@@ -21,12 +21,17 @@ def display_sheet_data(sheet, rows_to_display):
             print(f" {item} |", end="")
         print()
 
-    # Add sleep time after displaying sheet data
-    pyautogui.sleep(5)
+        # Add sleep time after displaying each row data
+        pyautogui.sleep(5)
 
-    # Call login function for the last row's credentials
-    last_row = rows_to_display[-1]
-    login(sheet.cell(row=last_row, column=2).value, sheet.cell(row=last_row, column=3).value)
+        # Call login function for the current row's credentials
+        login(sheet.cell(row=row_number, column=2).value, sheet.cell(row=row_number, column=3).value)
+
+        # Call logout function after processing current row
+        logout()
+
+    # Print a message indicating that all tasks are executed successfully
+    print("\nAll tasks completed for all users.")
 
 # Function to perform login actions
 def login(username, password):
@@ -34,7 +39,7 @@ def login(username, password):
     pyautogui.write(username)
     pyautogui.press('enter')
     print(f"2. Typing Username: {username}")
-    pyautogui.sleep(5)
+    pyautogui.sleep(7)  # Adjusted sleep time to 7 seconds
 
     # Type the password and press Enter
     pyautogui.write(password)
@@ -61,6 +66,7 @@ def logout():
     pyautogui.write(logout_url)
     pyautogui.press('enter')
     print("5. Logged out successfully")
+    pyautogui.sleep(7)  # Adjusted sleep time to 7 seconds
 
 # Sleep for 5 seconds before starting to allow time to focus on the target window
 pyautogui.sleep(5)
@@ -96,8 +102,6 @@ try:
             # Display selected rows
             display_sheet_data(selected_sheet, rows_to_display)
 
-            # Call logout function after displaying sheet data
-            logout()
         else:
             print("Invalid sheet number.")
     else:
