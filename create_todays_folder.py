@@ -1,15 +1,22 @@
 import os
 from datetime import datetime
 
+# ANSI escape codes for colors and styles
+class Style:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    BLUE = '\033[94m'
+    BOLD = '\033[1m'
+    END = '\033[0m'
 
 # Function to create a folder if it doesn't exist
 def create_folder_if_not_exists(folder_path):
     if not os.path.exists(folder_path):  # Check if the folder does not exist
         os.makedirs(folder_path)  # Create the folder and any necessary parent folders
-        print("Folder created successfully.")  # Print success message
+        print(Style.BOLD + Style.GREEN + "Folder created successfully." + Style.END)  # Print success message in bold green
         return folder_path  # Return the path of the created folder
     else:
-        print("Folder already exists.")  # Print message indicating that folder already exists
+        print(Style.BOLD + Style.RED + "Folder already exists." + Style.END)  # Print message indicating that folder already exists in bold red
         return folder_path  # Return the path of the existing folder
 
 
@@ -32,9 +39,9 @@ def main():
 
     # Display the created folder name, path, and creation datetime
     folder_name = os.path.basename(created_folder)
-    print("Created folder name:", folder_name)  # Print the name of the created folder
-    print("Created folder path:", created_folder)  # Print the path of the created folder
-    print("Creation date and time:", creation_datetime)  # Print the creation date and time
+    print(Style.BOLD + "Created folder name:" + Style.END, folder_name)  # Print the name of the created folder in bold
+    print(Style.BOLD + "Created folder path:" + Style.END, created_folder)  # Print the path of the created folder in bold
+    print(Style.BOLD + "Creation date and time:" + Style.END, Style.BOLD + Style.BLUE + today_date + Style.END)  # Print the creation date and time in bold and blue
 
 
 if __name__ == "__main__":
