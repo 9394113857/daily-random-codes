@@ -25,7 +25,7 @@ def login(username, password):
     print("4. Entering into YouTube")
 
     # Add a delay or sleep to allow time for the page to load (adjust sleep time as needed)
-    pyautogui.sleep(10)
+    pyautogui.sleep(15)  # Increased sleep time for page load
 
 # Function to perform logout actions
 def logout():
@@ -34,9 +34,10 @@ def logout():
     pyautogui.write(logout_url)
     pyautogui.press('enter')
     print("5. Logged out successfully")
+    pyautogui.sleep(5)  # Added sleep after logout
 
 # Sleep for 5 seconds before starting to allow time to focus on the target window
-pyautogui.sleep(5)
+pyautogui.sleep(10)  # Increased initial sleep time
 
 # Press 'f6' key (optional, remove if not needed)
 pyautogui.write(['f6'])
@@ -48,7 +49,7 @@ pyautogui.press('enter')  # Press Enter to navigate to the URL
 print("1. Typing URL")
 
 # Wait for the login page to load (adjust sleep time as needed)
-pyautogui.sleep(10)
+pyautogui.sleep(15)  # Increased sleep time for page load
 
 # Hardcode the Excel file name
 xlsx_file_name = "cc.xlsx"
@@ -73,7 +74,7 @@ try:
         rows = None
 
     # Add sleep time after taking row numbers input
-    pyautogui.sleep(5)
+    pyautogui.sleep(10)  # Increased sleep time after input prompt
 
     # Loop through each row in the Excel sheet
     for i, row in enumerate(ws.iter_rows(values_only=True), start=1):
@@ -86,8 +87,9 @@ try:
             logout()  # Perform logout actions
 
             # Wait for some time before moving to the next row (adjust sleep time as needed)
-            pyautogui.sleep(5)
+            pyautogui.sleep(10)  # Increased sleep time after processing each row
 
     print("\nAll tasks completed for all users.")
 except Exception as e:
     print(f"Error: {e}")
+
