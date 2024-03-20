@@ -1,15 +1,15 @@
 import os
 from datetime import datetime
 
-def delete_folder_if_exists(folder_path):
-    if os.path.exists(folder_path):  # Check if the folder exists
-        os.rmdir(folder_path)  # Delete the folder
-        print("Folder deleted successfully.")  # Print success message
-        return folder_path  # Return the path of the deleted folder
-    else:
-        print("Folder does not exist.")  # Print message indicating that folder does not exist
-        return None  # Return None if the folder does not exist
+# ANSI escape codes for colors and styles
+class Style:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    BLUE = '\033[94m'
+    BOLD = '\033[1m'
+    END = '\033[0m'
 
+# Main function
 def main():
     # Path to the parent directory
     parent_directory = r'C:\Users\pc\Downloads'
@@ -20,16 +20,16 @@ def main():
     # Path to the folder
     folder_path = os.path.join(parent_directory, today_date)
 
-    # Delete folder if it exists
-    deleted_folder = delete_folder_if_exists(folder_path)
-
-    # Get the current date and time
-    deletion_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    if deleted_folder:
-        # Display the deleted folder path and deletion datetime
-        print("Deleted folder path:", deleted_folder)
-        print("Deletion date and time:", deletion_datetime)
+    # Check if the folder exists
+    if os.path.exists(folder_path):
+        # Deleting today's folder
+        try:
+            os.rmdir(folder_path)  # Remove the directory
+            print(Style.BOLD + Style.RED + "Folder deleted successfully." + Style.END)  # Print success message in bold red
+        except OSError as e:
+            print(Style.BOLD + Style.RED + "Error: %s : %s" % (folder_path, e.strerror) + Style.END)  # Print error message in bold red
+    else:
+        print(Style.BOLD + Style.RED + "Folder does not exist." + Style.END)  # Print message indicating that folder does not exist in bold red
 
 
 if __name__ == "__main__":
