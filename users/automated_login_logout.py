@@ -59,17 +59,16 @@ try:
     sheet_names = wb.sheetnames
     print("Available sheets:", sheet_names)
 
-    # Prompt the user to enter the sheet name manually
-    sheet_name = input("Enter the sheet name manually: ")
+    # Prompt the user to enter the sheet number manually
+    sheet_number = int(input("Enter the sheet number: "))  # Convert input to integer
 
-    if sheet_name not in sheet_names:
-        raise ValueError(f"Sheet '{sheet_name}' not found in the Excel file.")
+    # Select the sheet based on the entered sheet number
+    ws = wb.worksheets[sheet_number - 1]  # Subtract 1 to adjust for zero-based indexing
 
-    ws = wb[sheet_name]
     rows_to_process = input("Do you want to specify rows to process? (yes/no): ")
     if rows_to_process.lower() == "yes":
-        row_numbers = input("Enter the row numbers separated by commas (e.g., 2,3,6): ")
-        rows = [int(row.strip()) for row in row_numbers.split(",")]
+        row_numbers = input("Enter the row numbers separated by commas (e.g., 1,6): ")
+        rows = [int(row.strip()) + 1 for row in row_numbers.split(",")]  # Adjusting row numbers as per user input
     else:
         rows = None
 
