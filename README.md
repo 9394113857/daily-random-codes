@@ -1,2 +1,2 @@
 # daily-random-codes
-daily-random-codes-main
+daily-random-codes
