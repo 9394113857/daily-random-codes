@@ -1,4 +1,5 @@
 import os
+import shutil
 
 # ANSI escape codes for colors and styles
 class Style:
@@ -31,7 +32,7 @@ def delete_downloads_contents():
             if os.path.isfile(item_path):
                 os.remove(item_path)  # Delete the file
             elif os.path.isdir(item_path):
-                os.rmdir(item_path)   # Delete the directory
+                shutil.rmtree(item_path)   # Delete the directory and its contents
         print(Style.RED + "All contents in Downloads directory have been deleted." + Style.END)
     elif user_input == "no":
         print(Style.BLUE + "Operation cancelled." + Style.END)
