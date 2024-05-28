@@ -21,20 +21,35 @@ def manage_folders():
         print(Fore.YELLOW + "No folders found inside 'folders' directory." + Style.RESET_ALL)
         return
 
-    # Iterate through each folder and ask the user if they want to delete it
-    for folder in folders:
-        folder_path = os.path.join(base_folder_path, folder)
-        print(Fore.CYAN + f"Folder: {folder}" + Style.RESET_ALL)
+    # Show all folders with serial numbers
+    print(Fore.CYAN + "Folders found inside 'folders' directory:" + Style.RESET_ALL)
+    for i, folder in enumerate(folders, start=1):
+        print(Fore.CYAN + f"{i}. {folder}" + Style.RESET_ALL)
 
-        # Ask user if they want to delete the folder
-        delete_choice = input(Fore.CYAN + f"Do you want to delete the folder '{folder}'? (yes/no): " + Style.RESET_ALL)
-        if delete_choice.lower() == "yes":
-            # Move the folder to the Recycle Bin
-            send2trash(folder_path)
-            print(Fore.GREEN + f"Folder '{folder}' moved to Recycle Bin." + Style.RESET_ALL)
-        else:
-            print(Fore.YELLOW + "Exiting without deleting any more folders." + Style.RESET_ALL)
+    # Ask for serial number to delete
+    while True:
+        folder_sno = input(Fore.CYAN + "Enter the serial number of the folder you want to delete (0 to exit): " + Style.RESET_ALL)
+        if folder_sno == "0":
+            print(Fore.YELLOW + "Exiting without deleting any folder." + Style.RESET_ALL)
             break
+        try:
+            folder_sno = int(folder_sno)
+            if folder_sno < 1 or folder_sno > len(folders):
+                print(Fore.RED + "Invalid serial number. Please enter a valid serial number." + Style.RESET_ALL)
+                continue
+            folder_to_delete = folders[folder_sno - 1]
+            folder_path = os.path.join(base_folder_path, folder_to_delete)
+
+            # Ask user for confirmation to delete the folder
+            delete_choice = input(Fore.CYAN + f"Do you want to delete the folder '{folder_to_delete}'? (yes/no): " + Style.RESET_ALL)
+            if delete_choice.lower() == "yes":
+                # Move the folder to the Recycle Bin
+                send2trash(folder_path)
+                print(Fore.GREEN + f"Folder '{folder_to_delete}' moved to Recycle Bin." + Style.RESET_ALL)
+            else:
+                print(Fore.YELLOW + "Skipping deletion of this folder." + Style.RESET_ALL)
+        except ValueError:
+            print(Fore.RED + "Invalid input. Please enter a valid serial number." + Style.RESET_ALL)
 
 # Call the function to manage folders
 manage_folders()
