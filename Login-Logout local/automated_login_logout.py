@@ -16,7 +16,10 @@ def login(username, password):
     pyautogui.sleep(5)
 
     # Press 'f6' key again (optional, remove if not needed)
-    pyautogui.write(['f6'])
+    pyautogui.press('f6')
+
+    # Add additional sleep time before accessing YouTube
+    pyautogui.sleep(10)  # Additional sleep time for stability
 
     # Type the YouTube URL and press Enter
     YouTube = "www.youtube.com"
@@ -24,23 +27,23 @@ def login(username, password):
     pyautogui.press('enter')
     print("4. Entering into YouTube")
 
-    # Add a delay or sleep to allow time for the page to load (adjust sleep time as needed)
-    pyautogui.sleep(5)  # Changed sleep time for page load
+    # Add a delay or sleep to allow time for the page to load
+    pyautogui.sleep(10)  # Increased sleep time for YouTube page load
 
 # Function to perform logout actions
 def logout():
-    pyautogui.write(['f6'])
+    pyautogui.press('f6')
     logout_url = "https://accounts.google.com/logout"
     pyautogui.write(logout_url)
     pyautogui.press('enter')
     print("5. Logged out successfully")
-    pyautogui.sleep(5)  # Changed sleep time after logout
+    pyautogui.sleep(5)  # Sleep time after logout
 
 # Sleep for 5 seconds before starting to allow time to focus on the target window
-pyautogui.sleep(5)  # Changed initial sleep time
+pyautogui.sleep(5)
 
 # Press 'f6' key (optional, remove if not needed)
-pyautogui.write(['f6'])
+pyautogui.press('f6')
 
 # Type the URL directly using pyautogui
 link = "https://accounts.google.com/signin"
@@ -49,10 +52,10 @@ pyautogui.press('enter')  # Press Enter to navigate to the URL
 print("1. Typing URL")
 
 # Wait for the login page to load (adjust sleep time as needed)
-pyautogui.sleep(5)  # Changed sleep time for page load
+pyautogui.sleep(5)
 
-# Hardcoded Excel file name
-xlsx_file_name = "D:\\daily-random-codes-main\\Login-Logout\\cc.xlsx"
+# Corrected Excel file path
+xlsx_file_name = "D:\\daily-random-codes-main\\Login-Logout local\\cc.xlsx"
 
 # Read sno, username, and password from Excel file
 try:
@@ -74,7 +77,7 @@ try:
         rows = None
 
     # Add sleep time after taking row numbers input
-    pyautogui.sleep(5)  # Changed sleep time after input prompt
+    pyautogui.sleep(5)
 
     # Loop through each row in the Excel sheet
     for i, row in enumerate(ws.iter_rows(values_only=True), start=1):
@@ -86,8 +89,22 @@ try:
             login(username, password)  # Perform login actions
             logout()  # Perform logout actions
 
-            # Wait for some time before moving to the next row (adjust sleep time as needed)
-            pyautogui.sleep(5)  # Changed sleep time after processing each row
+            # Wait for some time before moving to the next row
+            pyautogui.sleep(5)
+
+            # Check if there are more users in the loop
+            if i < len(list(ws.iter_rows(values_only=True))):
+                # Press 'f6' key (optional, remove if not needed)
+                pyautogui.press('f6')
+
+                # Type the URL directly using pyautogui
+                link = "https://accounts.google.com/signin"
+                pyautogui.write(link)
+                pyautogui.press('enter')  # Press Enter to navigate to the URL
+                print("1. Typing URL")
+
+                # Wait for the login page to load (adjust sleep time as needed)
+                pyautogui.sleep(5)
 
     print("\nAll tasks completed for all users.")
 except Exception as e:
