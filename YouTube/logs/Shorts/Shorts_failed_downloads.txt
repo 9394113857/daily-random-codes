@@ -1,0 +1,17 @@
+Failed Downloads:
+
+S.No: 1
+Index: 1
+Title: Lahe Lahe Acharya Signature step by Nainika.  #acharya #chiranjeevi #lahelahe #megastar
+Error: OKg9Zeslrig is age restricted, and can't be accessed without logging in.
+
+S.No: 2
+Index: 2
+Title: Photo shoot | Happy Ugadi | ఉగాది శుభాకాంక్షలు | Nainika & Thanaya
+Error: [Errno 22] Invalid argument: 'D:\\daily-random-codes-main\\YouTube\\folders\\Shorts\\Photo shoot | Happy Ugadi | ఉగాది శుభాకాంక్షలు | Nainika & Thanaya.mp4'
+
+S.No: 3
+Index: 3
+Title: Nainika Birthday Pics | Photo shoot
+Error: [Errno 22] Invalid argument: 'D:\\daily-random-codes-main\\YouTube\\folders\\Shorts\\Nainika Birthday Pics | Photo shoot.mp4'
+
