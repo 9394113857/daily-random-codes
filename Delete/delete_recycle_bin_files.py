@@ -1,5 +1,4 @@
 import ctypes
-import os
 
 def clear_recycle_bin():
     # Define the SHEmptyRecycleBin function
@@ -17,6 +16,10 @@ def clear_recycle_bin():
     # Check the result
     if result == 0:
         print("Recycle Bin has been emptied.")
+    elif result == 0x80070091:
+        print("The Recycle Bin is already empty.")
+    elif result == -2147418113:  # E_UNEXPECTED
+        print("Recycle Bin is already empty or unexpected error occurred.")
     else:
         print(f"Failed to empty Recycle Bin. Error code: {result}")
 
