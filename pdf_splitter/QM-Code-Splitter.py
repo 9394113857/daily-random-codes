@@ -44,7 +44,7 @@ class PDFSplitter:
         self.exit_button = Button(master, text="Exit", command=self.exit_app)
         self.exit_button.pack(pady=5)
 
-        self.output_path = r"C:\Users\pc\Desktop\Inv - Quality Medicare\July 2024"
+        self.output_path = r"C:\Users\pc\Desktop\Inv - Quality Medicare\Aug 2024"
         if not os.path.exists(self.output_path):
             os.makedirs(self.output_path)
 
