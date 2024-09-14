@@ -10,7 +10,6 @@ def cleanup(clip):
     except Exception as e:
         print(f"Error during cleanup: {e}")
 
-
 # Function to calculate the total duration of all video files in a given folder
 def calculate_total_time(folder_path):
     video_data = []  # List to store data for each video file
@@ -64,10 +63,9 @@ def calculate_total_time(folder_path):
     # Define table headers
     table_headers = ["S.No", "Video File", "Duration"]
 
-    # Print the formatted table using tabulate
+    # Print the formatted table using tabulate with grid format
     print("Total Duration of All Video Files:")
-    print(tabulate(video_data, headers=table_headers, tablefmt="pretty"))
-
+    print(tabulate(video_data, headers=table_headers, tablefmt="grid"))
 
 # Main function to prompt user for input and call the calculation functions
 def main():
@@ -78,7 +76,6 @@ def main():
         return
 
     calculate_total_time(path)  # Calculate total duration
-
 
 # Entry point of the script
 if __name__ == "__main__":
