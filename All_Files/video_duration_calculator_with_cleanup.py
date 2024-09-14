@@ -1,54 +1,52 @@
-# Import necessary libraries
-import os  # for interacting with the file system
-from moviepy.editor import VideoFileClip  # for getting the duration of video files
-from tabulate import tabulate  # for formatting data into a table
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from moviepy.editor import VideoFileClip
+import os
+from tabulate import tabulate
 
-# Function to handle cleanup after processing each video clip
-def cleanup(clip):
+def get_video_duration(file_path):
     try:
-        clip.close()  # Close the clip to release resources
+        clip = VideoFileClip(file_path)
+        duration = clip.duration
+        clip.close()
+        return duration
     except Exception as e:
-        print(f"Error during cleanup: {e}")
+        print(f"Error processing {file_path}: {e}")
+        return None
 
-# Function to calculate the total duration of all video files in a given folder
 def calculate_total_time(folder_path):
-    video_data = []  # List to store data for each video file
-    total_seconds = 0  # Initialize total duration in seconds
-    total_files = 0  # Initialize total number of video files
-    video_extensions = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'mpeg']  # List of common video file extensions
-    sno = 1  # Initialize serial number counter
+    video_data = []
+    total_seconds = 0
+    total_files = 0
+    video_extensions = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'mpeg']
+    sno = 1
+    file_paths = []
 
-    # Traverse through all files and subdirectories in the given folder
+    # Collect all video file paths
     for root, dirs, files in os.walk(folder_path):
         for file in files:
-            if file.split('.')[-1].lower() in video_extensions:  # Check if the file is a video file
-                file_path = os.path.join(root, file)  # Get the full path of the video file
-                clip = VideoFileClip(file_path)  # Load the video clip
-                try:
-                    duration = clip.duration  # Get the duration of the video clip
-                    total_seconds += duration  # Add the duration to the total duration
-                    total_files += 1  # Increment the total number of video files
+            if file.split('.')[-1].lower() in video_extensions:
+                file_paths.append(os.path.join(root, file))
 
-                    # Convert the duration to hours, minutes, and seconds
-                    hours = int(duration // 3600)
-                    minutes = int((duration % 3600) // 60)
-                    seconds = int(duration % 60)
+    # Process video files concurrently
+    with ThreadPoolExecutor() as executor:
+        futures = [executor.submit(get_video_duration, path) for path in file_paths]
+        for future in as_completed(futures):
+            duration = future.result()
+            if duration is not None:
+                total_seconds += duration
+                total_files += 1
+                hours = int(duration // 3600)
+                minutes = int((duration % 3600) // 60)
+                seconds = int(duration % 60)
+                video_data.append([sno, os.path.basename(file_paths[total_files - 1]), f"{hours} hours, {minutes} minutes, {seconds} seconds"])
+                sno += 1
 
-                    # Append data for the current video file to video_data list
-                    video_data.append([sno, file, f"{hours} hours, {minutes} minutes, {seconds} seconds"])
-                    sno += 1  # Increment serial number
-                finally:
-                    cleanup(clip)  # Call cleanup function to release resources after processing each video clip
-
-    # Convert the total duration to hours, minutes, and seconds
     total_hours = int(total_seconds // 3600)
     total_minutes = int((total_seconds % 3600) // 60)
     total_seconds_remainder = int(total_seconds % 60)
 
-    # Add a row for the total duration to the video_data list
     video_data.append(["Total", "", f"{total_hours} hours, {total_minutes} minutes, {total_seconds_remainder} seconds"])
 
-    # Calculate the average duration
     if total_files != 0:
         average_duration_seconds = total_seconds / total_files
         average_minutes = int(average_duration_seconds // 60)
@@ -57,26 +55,18 @@ def calculate_total_time(folder_path):
     else:
         average_duration_formatted = "N/A"
 
-    # Add a row for the average duration to the video_data list
     video_data.append(["Average", "", average_duration_formatted])
 
-    # Define table headers
     table_headers = ["S.No", "Video File", "Duration"]
-
-    # Print the formatted table using tabulate with grid format
     print("Total Duration of All Video Files:")
     print(tabulate(video_data, headers=table_headers, tablefmt="grid"))
 
-# Main function to prompt user for input and call the calculation functions
 def main():
-    path = input("Please enter the path to the directory containing video files: ")  # Ask user for folder path
-
-    if not os.path.exists(path):  # Check if the entered path exists
-        print("Invalid path!")  # Print error message if path is invalid
+    path = input("Please enter the path to the directory containing video files: ")
+    if not os.path.exists(path):
+        print("Invalid path!")
         return
+    calculate_total_time(path)
 
-    calculate_total_time(path)  # Calculate total duration
-
-# Entry point of the script
 if __name__ == "__main__":
-    main()  # Call the main function 
+    main()
