@@ -1,43 +1,25 @@
 import os
 import PyPDF2
-from tkinter import Tk, filedialog, Button, Label, Entry, StringVar, END, messagebox, Listbox, Scrollbar
+from tkinter import Tk, filedialog, Button, Label, Entry, StringVar, END, messagebox
 
 class PDFSplitter:
     def __init__(self, master):
         self.master = master
         self.master.title("PDF Splitter")
-        self.master.geometry("500x400")
+        self.master.geometry("400x300")
 
         self.pdf_file = None
         self.pdf_reader = None
-        self.input_path = None
-        self.output_path = r"C:\Users\pc\Desktop\Inv - Quality Medicare\Aug 2024"  # Default output path
+        self.output_path = None
 
-        # Input Directory
-        self.input_dir_label = Label(master, text="Input Directory:")
-        self.input_dir_label.pack(pady=5)
-        
-        self.input_dir_var = StringVar()
-        self.input_dir_entry = Entry(master, textvariable=self.input_dir_var, width=40)
-        self.input_dir_entry.pack(pady=5)
-
-        self.browse_input_button = Button(master, text="Browse Folder", command=self.select_input_directory)
-        self.browse_input_button.pack(pady=5)
-
-        # List of PDF Files
-        self.file_listbox = Listbox(master, height=6)
-        self.file_listbox.pack(pady=5)
-
-        # Scrollbar for the Listbox
-        self.scrollbar = Scrollbar(master)
-        self.file_listbox.config(yscrollcommand=self.scrollbar.set)
-        self.scrollbar.pack(side="right", fill="y")
-        self.scrollbar.config(command=self.file_listbox.yview)
+        # PDF File Selection Label
+        self.file_label = Label(master, text="No file selected")
+        self.file_label.pack(pady=5)
 
         self.select_button = Button(master, text="Select PDF File", command=self.select_pdf_file)
         self.select_button.pack(pady=5)
 
-        # Start and End Page
+        # Start Page
         self.start_label = Label(master, text="Start Page:")
         self.start_label.pack(pady=5)
 
@@ -45,23 +27,13 @@ class PDFSplitter:
         self.start_entry = Entry(master, textvariable=self.start_page_var)
         self.start_entry.pack(pady=5)
 
+        # End Page
         self.end_label = Label(master, text="End Page:")
         self.end_label.pack(pady=5)
 
         self.end_page_var = StringVar()
         self.end_entry = Entry(master, textvariable=self.end_page_var)
         self.end_entry.pack(pady=5)
-
-        # Output Directory
-        self.output_dir_label = Label(master, text="Output Directory:")
-        self.output_dir_label.pack(pady=5)
-
-        self.output_dir_var = StringVar(value=self.output_path)
-        self.output_dir_entry = Entry(master, textvariable=self.output_dir_var, width=40)
-        self.output_dir_entry.pack(pady=5)
-
-        self.browse_output_button = Button(master, text="Browse Output Folder", command=self.select_output_directory)
-        self.browse_output_button.pack(pady=5)
 
         # Output File Name
         self.output_label = Label(master, text="Output File Name:")
@@ -71,40 +43,29 @@ class PDFSplitter:
         self.output_entry = Entry(master, textvariable=self.output_file_var)
         self.output_entry.pack(pady=5)
 
+        # Save Button
         self.save_button = Button(master, text="Save Selected Pages", command=self.save_selected_pages)
         self.save_button.pack(pady=5)
 
+        # Output Directory Button
+        self.output_button = Button(master, text="Select Output Directory", command=self.select_output_directory)
+        self.output_button.pack(pady=5)
+
+        # Exit Button
         self.exit_button = Button(master, text="Exit", command=self.exit_app)
         self.exit_button.pack(pady=5)
 
-        # Ensure the default output directory exists
-        if not os.path.exists(self.output_path):
-            os.makedirs(self.output_path)
-
-    def select_input_directory(self):
-        self.input_path = filedialog.askdirectory()
-        if self.input_path:
-            self.input_dir_var.set(self.input_path)
-            self.load_pdf_files()
-
-    def load_pdf_files(self):
-        self.file_listbox.delete(0, END)  # Clear the listbox
-        pdf_files = [f for f in os.listdir(self.input_path) if f.endswith('.pdf')]
-        for file in pdf_files:
-            self.file_listbox.insert(END, file)
-
     def select_pdf_file(self):
-        selected_file = self.file_listbox.get(self.file_listbox.curselection())
-        file_path = os.path.join(self.input_path, selected_file)
+        file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
         if file_path:
             self.pdf_file = open(file_path, "rb")
             self.pdf_reader = PyPDF2.PdfReader(self.pdf_file)
-            messagebox.showinfo("File Selected", f"File Selected: {selected_file}")
+            self.file_label.config(text=f"Selected File: {file_path}")
 
     def select_output_directory(self):
         self.output_path = filedialog.askdirectory()
         if self.output_path:
-            self.output_dir_var.set(self.output_path)
+            messagebox.showinfo("Output Directory Selected", f"Selected Output Directory: {self.output_path}")
 
     def save_selected_pages(self):
         try:
@@ -116,8 +77,12 @@ class PDFSplitter:
                 messagebox.showerror("Error", "Please provide an output file name.")
                 return
 
+            if not self.output_path:
+                messagebox.showerror("Error", "Please select an output directory.")
+                return
+
             output_file_name = f"QM-{input_file_name}_2024-25.pdf"
-            output_path = os.path.join(self.output_dir_var.get(), output_file_name)
+            output_path = os.path.join(self.output_path, output_file_name)
 
             self.pdf_writer = PyPDF2.PdfWriter()
 
