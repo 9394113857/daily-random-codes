@@ -114,3 +114,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Both QH and QM paths are taken if not and remaining both files flow same accordingly only.
