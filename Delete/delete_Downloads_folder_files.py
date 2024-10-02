@@ -87,7 +87,7 @@ if __name__ == "__main__":
         if system_choice == "1":
             folder_path = r"C:\Users\pc\Downloads"  # Path for office system
         elif system_choice == "2":
-            folder_path = r"C:\Users\your-laptop-username\Downloads"  # Replace with actual laptop path
+            folder_path = r"C:\Users\Raghu\Downloads"  # Updated path for your laptop
         else:
             # Handle invalid system choice
             print(Style.RED + "Invalid system choice. Please select a valid option." + Style.END)
@@ -95,18 +95,3 @@ if __name__ == "__main__":
 
         # Call the function to delete files in the selected folder
         delete_files_in_folder(folder_path)
-
-""" 
-Comments Added:
-1.	Imports: Importing necessary modules (os and shutil).
-2.	Style Class: Defining ANSI escape codes for different colors and styles.
-3.	Function Definition: delete_files_in_folder() handles the deletion of files in a specified folder.
-4.	Folder Path Check: Verifying if the provided folder path exists; if not, print an error message and exit.
-5.	List Files: Listing all files and directories in the specified folder.
-6.	Check Empty Folder: Checking if the folder is empty and reading the status file if it exists.
-7.	Empty Folder Message: Displaying a message if the folder is already empty based on the status.
-8.	File Deletion: Asking for user confirmation before deleting files and directories.
-9.	Delete Files: Deleting files and directories based on user input and updating the status file.
-10.	User Input Handling: Managing user responses for deletion or cancellation.
-11.	Main Block: Providing options to the user, including the option to exit, and handling invalid choices.
-"""
