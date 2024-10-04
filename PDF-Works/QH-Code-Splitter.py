@@ -12,6 +12,10 @@ class PDFSplitter:
         self.pdf_reader = None
         self.output_path = None
 
+        # Healthcare Title Label
+        self.title_label = Label(master, text="Quality-Healthcare", font=("Helvetica", 16, "bold"))
+        self.title_label.pack(pady=10)
+
         # PDF File Selection Label
         self.file_label = Label(master, text="No file selected")
         self.file_label.pack(pady=5)
@@ -114,5 +118,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# Both QH and QM paths are taken if not and remaining both files flow same accordingly only.
