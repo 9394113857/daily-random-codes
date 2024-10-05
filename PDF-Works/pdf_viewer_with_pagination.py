@@ -1,24 +1,25 @@
 import os
 import tkinter as tk
-from tkinter import ttk, messagebox, font
+from tkinter import ttk, messagebox, font, filedialog
+import csv
 
 # Function to display PDFs on the current page
 def display_pdfs(page_number, pdf_files, files_per_page=5):
     start_index = (page_number - 1) * files_per_page
     end_index = start_index + files_per_page
     files_to_display = pdf_files[start_index:end_index]
-    
+
     # Clear the treeview before displaying new data
     for row in treeview.get_children():
         treeview.delete(row)
-    
+
     # Insert the files in the table with pagination
     for i, file_name in enumerate(files_to_display, start=start_index + 1):
         treeview.insert("", "end", values=(i, file_name))
 
     # Update the page info
     page_label.config(text=f"Page {page_number} of {total_pages}")
-    
+
     # Disable buttons when appropriate
     first_button.config(state="normal" if page_number > 1 else "disabled")
     prev_button.config(state="normal" if page_number > 1 else "disabled")
@@ -48,6 +49,30 @@ def prev_page():
     global current_page
     current_page -= 1
     display_pdfs(current_page, pdf_files)
+
+# Function to save the PDF filenames to a CSV file
+def save_output():
+    # Prompt the user to choose a directory to save the CSV file
+    save_directory = filedialog.askdirectory(title="Select Directory to Save CSV")
+    
+    if save_directory:  # Ensure the user has not cancelled the dialog
+        # Prompt for the filename
+        csv_filename = tk.simpledialog.askstring("Input", "Enter the name of the CSV file (without .csv extension):")
+        
+        if csv_filename:
+            # Create the full path for the CSV file
+            full_path = os.path.join(save_directory, f"{csv_filename}.csv")
+            
+            # Write the PDF filenames to the CSV file
+            with open(full_path, mode='w', newline='') as csv_file:
+                csv_writer = csv.writer(csv_file)
+                # Write the header
+                csv_writer.writerow(["S.No", "Invoice"])
+                # Write the data
+                for index, pdf in enumerate(pdf_files, start=1):
+                    csv_writer.writerow([index, pdf])
+            
+            messagebox.showinfo("Success", f"Saved output to {full_path}")
 
 # Function to close the application
 def exit_app():
@@ -93,7 +118,11 @@ def main_window(directory, window_title):
 
     # Exit Button
     exit_button = tk.Button(root, text="Exit", command=exit_app)
-    exit_button.pack(pady=20)
+    exit_button.pack(pady=10)
+
+    # Save Button
+    save_button = tk.Button(root, text="Save Output", command=save_output)
+    save_button.pack(pady=10)
 
     # Load PDF files from the directory
     files = os.listdir(directory)
