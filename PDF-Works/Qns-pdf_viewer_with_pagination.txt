@@ -1,0 +1,6 @@
+pdf_viewer_with_pagination.py
+
+Qns-list:-
+Can I add filters?
+How to handle errors?
+Can you add validation?
