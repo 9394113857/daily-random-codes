@@ -73,6 +73,10 @@ def save_output():
                     csv_writer.writerow([index, pdf])
             
             messagebox.showinfo("Success", f"Saved output to {full_path}")
+        else:
+            messagebox.showerror("Error", "Please provide a valid CSV filename.")
+    else:
+        messagebox.showwarning("Warning", "Save operation was cancelled.")
 
 # Function to close the application
 def exit_app():
@@ -154,6 +158,10 @@ def input_window():
         if not os.path.exists(directory):
             messagebox.showerror("Error", "Invalid directory path.")
             return
+
+        if not window_title.strip():  # Ensure title is not empty
+            messagebox.showerror("Error", "Window title cannot be empty.")
+            return
         
         # Close input window and open the main window
         input_win.destroy()
@@ -168,6 +176,10 @@ def input_window():
     dir_entry = tk.Entry(input_win, width=40)
     dir_entry.grid(row=0, column=1, padx=10, pady=5)
 
+    # Button to select directory
+    select_button = tk.Button(input_win, text="Select", command=lambda: dir_entry.insert(0, filedialog.askdirectory()))
+    select_button.grid(row=0, column=2, padx=5)
+
     # Window Title Input
     tk.Label(input_win, text="Enter Window Title:").grid(row=1, column=0, padx=10, pady=5)
     title_entry = tk.Entry(input_win, width=40)
@@ -175,7 +187,7 @@ def input_window():
 
     # OK Button
     ok_button = tk.Button(input_win, text="OK", command=on_ok)
-    ok_button.grid(row=2, columnspan=2, pady=10)
+    ok_button.grid(row=2, columnspan=3, pady=10)
 
     # Start the input window loop
     input_win.mainloop()

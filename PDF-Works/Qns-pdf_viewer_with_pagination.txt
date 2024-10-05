@@ -16,3 +16,7 @@ Can I add filters?
 How to edit CSV?
 
 How to add sorting?
+
+Fix CSV save path?
+
+How to debug Tkinter?
