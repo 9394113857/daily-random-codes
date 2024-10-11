@@ -1,168 +1,164 @@
 import os  # Importing the os module for interacting with the file system
-import tkinter as tk  # Importing tkinter for GUI
-from tkinter import ttk, messagebox, filedialog  # Importing additional tkinter components like Treeview, messagebox, and filedialog
-import math  # Importing math for pagination calculations
+import tkinter as tk  # Importing tkinter for creating GUI applications
+from tkinter import ttk, messagebox, filedialog  # Importing additional tkinter components: Treeview, message boxes, and file dialogs
+import math  # Importing the math module to handle pagination calculations
 
-# Function to handle folder selection and display its contents in a table format
+# Function to open a folder selection dialog and display its contents
 def select_folder(window):
-    folder_path = filedialog.askdirectory()  # Open folder selection dialog
-    if folder_path:  # If the user selects a folder
-        display_file_tree(window, folder_path)  # Display the file tree
+    folder_path = filedialog.askdirectory()  # Open a dialog for the user to select a folder
+    if folder_path:  # If a valid folder is selected
+        display_file_tree(window, folder_path)  # Call the function to display the folder's contents in a tree structure
 
-# Function to display files in a table format with pagination
+# Function to display the folder contents in a table-like format with pagination
 def display_file_tree(window, folder_path):
-    # Clear the current window content
+    # Clear any existing content in the window
     for widget in window.winfo_children():
         widget.destroy()
 
-    # Create a treeview widget for displaying files/folders in a tabular format
-    tree = ttk.Treeview(window, columns=("S.No", "File/Folder"), show="headings")
-    tree.heading("S.No", text="S.No")  # Set the heading for S.No column
+    # Create a Treeview widget to display the files and folders in columns
+    tree = ttk.Treeview(window, columns=("S.No", "File/Folder"), show="headings")  # Create tree columns: S.No and File/Folder
+    tree.heading("S.No", text="S.No")  # Set the heading for Serial Number column
     tree.heading("File/Folder", text="File/Folder")  # Set the heading for File/Folder column
-    tree.pack(fill=tk.BOTH, expand=True)  # Expand it to fill the window space
+    tree.pack(fill=tk.BOTH, expand=True)  # Make the tree fill the available space in the window
 
-    all_items = []  # List to hold all the items (files/folders)
+    all_items = []  # Initialize a list to hold all file and folder names in the selected folder
 
-    # Function to insert files/folders recursively in the tree
+    # Function to recursively insert files and folders into the tree
     def insert_files(parent, folder):
         try:
-            # List directory content
-            items = sorted(os.listdir(folder))  # Sorting directory items alphabetically
+            # Get a sorted list of items (files and folders) in the directory
+            items = sorted(os.listdir(folder))
             for item in items:
-                path = os.path.join(folder, item)  # Forming full path of the item
-                all_items.append(item)  # Append the item to the list of all items
+                path = os.path.join(folder, item)  # Get the full path for the item
+                all_items.append(item)  # Add the item to the list of all items
                 if os.path.isdir(path):  # If the item is a folder
                     insert_files(parent, path)  # Recursively insert its contents
-        except PermissionError:  # Catch permission errors (e.g., restricted folders)
-            pass  # Ignore and move to the next item
+        except PermissionError:  # Handle permission errors when trying to access restricted folders
+            pass  # Skip the folder if permission is denied
 
-    # Insert the root directory
-    insert_files("", folder_path)  # Call the recursive function to insert files/folders
+    insert_files("", folder_path)  # Call the function to insert files starting from the selected folder
 
-    # If the folder is empty, show an alert and provide feedback
+    # If no items are found in the folder, show a message and return
     if not all_items:
         messagebox.showinfo("No Files Found", f"No files or folders found in {folder_path}")
-        return  # Exit function if no items are found
+        return  # Exit the function if the folder is empty
 
-    items_per_page = 10  # Define how many items to show per page
-    current_page = [1]  # Use a list to allow modification in inner functions (mutable)
-    total_pages = math.ceil(len(all_items) / items_per_page)  # Calculate total number of pages
+    # Pagination settings: how many items to display per page
+    items_per_page = 10  # Set the number of items to display on each page
+    current_page = [1]  # Keep track of the current page in a mutable list
+    total_pages = math.ceil(len(all_items) / items_per_page)  # Calculate the total number of pages
 
-    # Label to display the current page number and total pages
+    # Create a label to display the current page number and total pages
     page_label = tk.Label(window, text=f"Page {current_page[0]} of {total_pages}", font=("Arial", 12))  # Page label
-    page_label.pack(pady=5)  # Add label with padding
+    page_label.pack(pady=5)  # Add some padding around the page label
 
-    # Function to update the tree view based on the current page
+    # Function to update the Treeview with items for the current page
     def update_tree(filtered_items):
-        # Clear the tree (remove existing items)
-        tree.delete(*tree.get_children())
+        tree.delete(*tree.get_children())  # Clear the current items in the Treeview
 
-        # Calculate the start and end index for the current page
-        start = (current_page[0] - 1) * items_per_page  # Calculate start index
-        end = min(start + items_per_page, len(filtered_items))  # Calculate end index (ensuring it doesn't exceed total items)
+        # Determine the start and end index for the items on the current page
+        start = (current_page[0] - 1) * items_per_page  # Start index
+        end = min(start + items_per_page, len(filtered_items))  # End index (ensure we don't exceed the item count)
 
-        # Insert the items for the current page with serial numbers
-        for idx in range(start, end):  # Loop through items for the current page
-            item = filtered_items[idx]  # Get the item from filtered list
-            tree.insert("", "end", values=(idx + 1, item))  # Insert the item with its serial number
+        # Insert the items for the current page into the Treeview with serial numbers
+        for idx in range(start, end):
+            item = filtered_items[idx]  # Get the item
+            tree.insert("", "end", values=(idx + 1, item))  # Insert the item into the Treeview
 
-        # Update the page label to reflect current page and total pages
-        page_label.config(text=f"Page {current_page[0]} of {total_pages}")  # Update page label text
+        # Update the page label to reflect the current page
+        page_label.config(text=f"Page {current_page[0]} of {total_pages}")  # Update page number in the label
 
-    # Function to filter items based on the input extensions
+    # Function to apply file extension filters based on user input
     def apply_filter():
-        filter_text = filter_entry.get()  # Get filter text from entry field
-        # Split the input into a list of extensions and remove any whitespace
-        filters = [ext.strip() for ext in filter_text.split(",") if ext.strip()]
-        
-        # Create a lambda function to check if the file ends with any of the specified extensions
-        if filters:  # If there are filters specified
-            filtered_items = [item for item in all_items if any(item.endswith(ext) for ext in filters)]
+        filter_text = filter_entry.get()  # Get the filter input from the entry field
+        filters = [ext.strip() for ext in filter_text.split(",") if ext.strip()]  # Create a list of filters, removing whitespace
+
+        if filters:  # If filters are specified
+            filtered_items = [item for item in all_items if any(item.endswith(ext) for ext in filters)]  # Filter items based on extensions
         else:
-            filtered_items = all_items  # If no filters, show all items
-        
-        # Update total pages and reset to the first page
-        total_pages = math.ceil(len(filtered_items) / items_per_page)  
-        current_page[0] = 1  
-        update_tree(filtered_items)  # Update the displayed items
+            filtered_items = all_items  # If no filter is applied, show all items
 
-    # Create a frame for the filter entry
-    filter_frame = tk.Frame(window)  # Create a frame for the filter input
-    filter_frame.pack(pady=10)  # Add the filter frame with padding
+        nonlocal total_pages  # Use nonlocal to modify the total_pages variable
+        total_pages = math.ceil(len(filtered_items) / items_per_page)  # Recalculate total pages based on the filtered items
+        current_page[0] = 1  # Reset to the first page
+        update_tree(filtered_items)  # Update the Treeview with the filtered items
 
-    # Entry for filter input
-    filter_entry = tk.Entry(filter_frame, width=30, font=("Arial", 12))  # Create an entry field for filter input
-    filter_entry.pack(side=tk.LEFT, padx=5)  # Position it in the frame
+    # Create a frame to hold the filter entry and button
+    filter_frame = tk.Frame(window)  # Frame for filter input
+    filter_frame.pack(pady=10)  # Add padding around the filter frame
 
-    # Filter button to apply the filter
+    # Entry widget for users to input file extensions for filtering
+    filter_entry = tk.Entry(filter_frame, width=30, font=("Arial", 12))  # Input field for file extension filter
+    filter_entry.pack(side=tk.LEFT, padx=5)  # Position the entry field in the filter frame
+
+    # Button to apply the filter
     filter_button = tk.Button(filter_frame, text="Apply Filter", command=apply_filter, font=("Arial", 12, "bold"))  # Filter button
-    filter_button.pack(side=tk.LEFT)  # Position it next to the entry
+    filter_button.pack(side=tk.LEFT)  # Position the button next to the entry field
 
-    # Add navigation buttons for pagination
-    def create_pagination_buttons():
-        # Previous button logic
-        def go_previous(filtered_items):
-            if current_page[0] > 1:  # If not on the first page
-                current_page[0] -= 1  # Move to the previous page
-                update_tree(filtered_items)  # Update tree view
+    # Function to create pagination buttons (First, Previous, Next, Last)
+    def create_pagination_buttons(filtered_items):
+        # Function to go to the previous page
+        def go_previous():
+            if current_page[0] > 1:  # Check if not on the first page
+                current_page[0] -= 1  # Decrement the current page
+                update_tree(filtered_items)  # Update the Treeview with the new page
 
-        # Next button logic
-        def go_next(filtered_items):
-            if current_page[0] < total_pages:  # If not on the last page
-                current_page[0] += 1  # Move to the next page
-                update_tree(filtered_items)  # Update tree view
+        # Function to go to the next page
+        def go_next():
+            if current_page[0] < total_pages:  # Check if not on the last page
+                current_page[0] += 1  # Increment the current page
+                update_tree(filtered_items)  # Update the Treeview with the new page
 
-        # First page button logic
-        def go_first(filtered_items):
-            current_page[0] = 1  # Move to the first page
-            update_tree(filtered_items)  # Update tree view
+        # Function to go to the first page
+        def go_first():
+            current_page[0] = 1  # Set current page to the first page
+            update_tree(filtered_items)  # Update the Treeview with the first page
 
-        # Last page button logic
-        def go_last(filtered_items):
-            current_page[0] = total_pages  # Move to the last page
-            update_tree(filtered_items)  # Update tree view
+        # Function to go to the last page
+        def go_last():
+            current_page[0] = total_pages  # Set current page to the last page
+            update_tree(filtered_items)  # Update the Treeview with the last page
 
-        # Create buttons and bind to functions
-        btn_frame = tk.Frame(window)  # Create a frame to hold buttons
+        # Create a frame to hold pagination buttons
+        btn_frame = tk.Frame(window)  # Frame for pagination buttons
         btn_frame.pack()  # Add the frame to the window
 
-        btn_first = tk.Button(btn_frame, text="First", command=lambda: go_first(filtered_items), font=("Arial", 10, "bold"))  # First button
-        btn_first.grid(row=0, column=0, padx=5)  # Position the First button
+        # Button to go to the first page
+        btn_first = tk.Button(btn_frame, text="First", command=go_first, font=("Arial", 10, "bold"))  # First page button
+        btn_first.grid(row=0, column=0, padx=5)  # Position the button in the frame
 
-        btn_previous = tk.Button(btn_frame, text="Previous", command=lambda: go_previous(filtered_items), font=("Arial", 10, "bold"))  # Previous button
-        btn_previous.grid(row=0, column=1, padx=5)  # Position the Previous button
+        # Button to go to the previous page
+        btn_previous = tk.Button(btn_frame, text="Previous", command=go_previous, font=("Arial", 10, "bold"))  # Previous page button
+        btn_previous.grid(row=0, column=1, padx=5)  # Position the button in the frame
 
-        btn_next = tk.Button(btn_frame, text="Next", command=lambda: go_next(filtered_items), font=("Arial", 10, "bold"))  # Next button
-        btn_next.grid(row=0, column=2, padx=5)  # Position the Next button
+        # Button to go to the next page
+        btn_next = tk.Button(btn_frame, text="Next", command=go_next, font=("Arial", 10, "bold"))  # Next page button
+        btn_next.grid(row=0, column=2, padx=5)  # Position the button in the frame
 
-        btn_last = tk.Button(btn_frame, text="Last", command=lambda: go_last(filtered_items), font=("Arial", 10, "bold"))  # Last button
-        btn_last.grid(row=0, column=3, padx=5)  # Position the Last button
+        # Button to go to the last page
+        btn_last = tk.Button(btn_frame, text="Last", command=go_last, font=("Arial", 10, "bold"))  # Last page button
+        btn_last.grid(row=0, column=3, padx=5)  # Position the button in the frame
 
-    # Initialize the tree with the first page
-    update_tree(all_items)  # Call update_tree to display the first page
-    create_pagination_buttons()  # Add the pagination buttons
+    # Initialize the Treeview by displaying the first page of all items
+    update_tree(all_items)  # Update the Treeview with the first page of items
+    create_pagination_buttons(all_items)  # Create the pagination buttons
 
-    # Create an Exit button
+    # Create an Exit button to close the application
     exit_button = tk.Button(window, text="Exit", command=window.quit, font=("Arial", 12, "bold"))  # Exit button
-    exit_button.pack(pady=20)  # Add the Exit button with padding
+    exit_button.pack(pady=20)  # Add padding around the Exit button
 
-# Main function to create the Tkinter window
+# Main function to run the application
 def main():
-    window = tk.Tk()  # Create the main window
-    window.title("File Tree Viewer")  # Set the window title
-    window.geometry("600x400")  # Set window size
+    root = tk.Tk()  # Create the main application window
+    root.title("File Browser with Pagination")  # Set the window title
+    root.geometry("600x500")  # Set the window size
 
-    # Add a label for the title
-    label = tk.Label(window, text="File Tree Viewer", font=("Arial", 16, "bold"))  # Title label
-    label.pack(pady=10)  # Add label with padding
+    # Create a "Select Folder" button for the user to choose a folder
+    select_button = tk.Button(root, text="Select Folder", command=lambda: select_folder(root), font=("Arial", 12, "bold"))
+    select_button.pack(pady=20)  # Add padding around the Select Folder button
 
-    # Create a button to select a folder
-    select_button = tk.Button(window, text="Select Folder", command=lambda: select_folder(window), font=("Arial", 12, "bold"))  # Button to select folder
-    select_button.pack(pady=20)  # Add button with padding
+    root.mainloop()  # Start the main event loop for the application
 
-    # Run the Tkinter event loop
-    window.mainloop()  # Start the GUI
-
-# Call the main function to run the program
+# Call the main function to run the application
 if __name__ == "__main__":
-    main()  # Entry point of the program
+    main()  # Start the file browser application
