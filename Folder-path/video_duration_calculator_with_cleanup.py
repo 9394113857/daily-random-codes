@@ -23,7 +23,7 @@ class VideoDurationApp:
         self.root.title("Video Duration Calculator")  # Set the window title
         self.video_data = []  # Stores video data for displaying
         self.file_paths = []  # Stores the file paths of video files
-        self.total_seconds = 0
+        self.total_seconds = 0  # Stores total duration in seconds
         self.page = 1  # Pagination current page
         self.per_page = 10  # Number of rows per page
         
@@ -67,10 +67,12 @@ class VideoDurationApp:
             self.folder_path = folder_path
             self.calculate_button.config(state=tk.NORMAL)  # Enable the calculate button
 
-    # Cell 6: Function to calculate total video duration
+    # Cell 6: Function to calculate total and average video duration
     def calculate_total_time(self):
         video_extensions = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'mpeg']
         self.file_paths = []
+        self.video_data.clear()
+        self.total_seconds = 0
 
         # Walk through the folder and gather video file paths
         for root, dirs, files in os.walk(self.folder_path):
@@ -89,14 +91,34 @@ class VideoDurationApp:
             for i, future in enumerate(as_completed(futures)):
                 duration = future.result()
                 if duration is not None:
+                    self.total_seconds += duration
                     hours = int(duration // 3600)
                     minutes = int((duration % 3600) // 60)
                     seconds = int(duration % 60)
                     self.video_data.append([i + 1, os.path.basename(self.file_paths[i]), f"{hours} hours, {minutes} minutes, {seconds} seconds"])
 
+        # Calculate total and average duration
+        total_hours = int(self.total_seconds // 3600)
+        total_minutes = int((self.total_seconds % 3600) // 60)
+        total_seconds = int(self.total_seconds % 60)
+
+        # Calculate average duration if there are any videos
+        if len(self.video_data) > 0:
+            average_duration = self.total_seconds / len(self.video_data)
+            avg_hours = int(average_duration // 3600)
+            avg_minutes = int((average_duration % 3600) // 60)
+            avg_seconds = int(average_duration % 60)
+        else:
+            avg_hours = avg_minutes = avg_seconds = 0
+
+        self.total_duration_str = f"Total Duration: {total_hours} hours, {total_minutes} minutes, {total_seconds} seconds"
+        self.avg_duration_str = f"Average Duration: {avg_hours} hours, {avg_minutes} minutes, {avg_seconds} seconds"
+
         # Enable the next button if there is more than one page of data
         if len(self.video_data) > self.per_page:
             self.next_button.config(state=tk.NORMAL)
+
+        # Display the results
         self.show_page(self.page)
 
     # Cell 7: Function to display the current page of video data
@@ -111,6 +133,13 @@ class VideoDurationApp:
         # Create a new window to show the video data in tabular form
         result_window = tk.Toplevel(self.root)
         result_window.title(f"Page {page}")
+
+        # Display the total and average durations
+        total_duration_label = tk.Label(result_window, text=self.total_duration_str, font=('Arial', 12, 'bold'))
+        total_duration_label.pack(pady=10)
+
+        avg_duration_label = tk.Label(result_window, text=self.avg_duration_str, font=('Arial', 12, 'bold'))
+        avg_duration_label.pack(pady=10)
 
         result_label = tk.Label(result_window, text=formatted_table, font=('Courier', 10), justify=tk.LEFT)
         result_label.pack()
