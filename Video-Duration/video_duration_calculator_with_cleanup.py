@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from moviepy.editor import VideoFileClip
 from tabulate import tabulate
 
-# Cell 1: Function to get video duration
+# Function to get video duration
 def get_video_duration(file_path):
     try:
         clip = VideoFileClip(file_path)
@@ -16,7 +16,7 @@ def get_video_duration(file_path):
         print(f"Error processing {file_path}: {e}")
         return None
 
-# Cell 2: Main class for the GUI Application
+# Main class for the GUI Application
 class VideoDurationApp:
     def __init__(self, root):
         self.root = root
@@ -26,11 +26,10 @@ class VideoDurationApp:
         self.total_seconds = 0
         self.page = 1  # Pagination current page
         self.per_page = 10  # Number of rows per page
-        
-        # Cell 3: Adding widgets for user interaction
+
+        # Adding widgets for user interaction
         self.create_widgets()
 
-    # Cell 4: Function to create the UI elements
     def create_widgets(self):
         # Button to allow the user to select a directory
         self.select_button = tk.Button(self.root, text="Select Directory", font=('Arial', 12, 'bold'), command=self.select_directory)
@@ -59,7 +58,6 @@ class VideoDurationApp:
         self.exit_button = tk.Button(self.root, text="Exit", font=('Arial', 12, 'bold'), command=self.root.quit)
         self.exit_button.pack(pady=20)
 
-    # Cell 5: Function to select directory and enable calculation button
     def select_directory(self):
         folder_path = filedialog.askdirectory()
         if folder_path:
@@ -67,7 +65,6 @@ class VideoDurationApp:
             self.folder_path = folder_path
             self.calculate_button.config(state=tk.NORMAL)  # Enable the calculate button
 
-    # Cell 6: Function to calculate total video duration
     def calculate_total_time(self):
         video_extensions = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'mpeg']
         self.file_paths = []
@@ -92,18 +89,35 @@ class VideoDurationApp:
                     hours = int(duration // 3600)
                     minutes = int((duration % 3600) // 60)
                     seconds = int(duration % 60)
-                    self.video_data.append([i + 1, os.path.basename(self.file_paths[i]), f"{hours} hours, {minutes} minutes, {seconds} seconds"])
+                    self.video_data.append([i + 1, os.path.basename(self.file_paths[i]), f"{hours} hours, {minutes} minutes, {seconds} seconds", duration])
 
         # Enable the next button if there is more than one page of data
         if len(self.video_data) > self.per_page:
             self.next_button.config(state=tk.NORMAL)
         self.show_page(self.page)
 
-    # Cell 7: Function to display the current page of video data
     def show_page(self, page):
         start = (page - 1) * self.per_page
         end = start + self.per_page
         data_to_display = self.video_data[start:end]
+
+        # Calculate the total and average duration
+        total_duration = sum([video[3] for video in self.video_data])
+        average_duration = total_duration / len(self.video_data) if self.video_data else 0
+
+        total_hours = int(total_duration // 3600)
+        total_minutes = int((total_duration % 3600) // 60)
+        total_seconds = int(total_duration % 60)
+
+        average_hours = int(average_duration // 3600)
+        average_minutes = int((average_duration % 3600) // 60)
+        average_seconds = int(average_duration % 60)
+
+        # Add summary information (Total and Average durations)
+        summary = [
+            ["Total Duration", f"{total_hours} hours, {total_minutes} minutes, {total_seconds} seconds"],
+            ["Average Duration", f"{average_hours} hours, {average_minutes} minutes, {average_seconds} seconds"]
+        ]
 
         table_headers = ["S.No", "Video File", "Duration"]
         formatted_table = tabulate(data_to_display, headers=table_headers, tablefmt="grid")
@@ -112,8 +126,21 @@ class VideoDurationApp:
         result_window = tk.Toplevel(self.root)
         result_window.title(f"Page {page}")
 
-        result_label = tk.Label(result_window, text=formatted_table, font=('Courier', 10), justify=tk.LEFT)
-        result_label.pack()
+        # Display the formatted table
+        table_label = tk.Label(result_window, text=formatted_table, font=('Courier', 10), justify=tk.LEFT)
+        table_label.pack(padx=10, pady=10)
+
+        # Display the summary at the bottom
+        summary_frame = tk.Frame(result_window)
+        summary_frame.pack(pady=10)
+
+        summary_label = tk.Label(summary_frame, text="Summary:", font=('Arial', 12, 'bold'))
+        summary_label.pack()
+
+        for row in summary:
+            summary_text = f"{row[0]}: {row[1]}"
+            summary_row = tk.Label(summary_frame, text=summary_text, font=('Arial', 10))
+            summary_row.pack()
 
         # Enable/disable the prev and next buttons based on the page number
         if page == 1:
@@ -126,17 +153,15 @@ class VideoDurationApp:
         else:
             self.next_button.config(state=tk.NORMAL)
 
-    # Cell 8: Function to show the next page of data
     def show_next_page(self):
         self.page += 1
         self.show_page(self.page)
 
-    # Cell 9: Function to show the previous page of data
     def show_previous_page(self):
         self.page -= 1
         self.show_page(self.page)
 
-# Cell 10: Main function to run the Tkinter application
+# Main function to run the Tkinter application
 def main():
     root = tk.Tk()
     app = VideoDurationApp(root)
