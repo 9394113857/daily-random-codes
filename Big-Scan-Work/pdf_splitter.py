@@ -3,7 +3,6 @@ from tkinter import filedialog, ttk, messagebox
 import fitz  # PyMuPDF for PDF rendering
 from PIL import Image, ImageTk
 import os
-from datetime import datetime
 
 
 class PDFViewerApp:
@@ -158,7 +157,11 @@ class PDFSplitterApp:
                 output_pdf = fitz.open()
                 for page_num in page_range:
                     output_pdf.insert_pdf(pdf, from_page=page_num, to_page=page_num)
-                output_path = os.path.join(output_dir, f"{file_prefix}_{idx + 1}.pdf")
+                
+                # Save the output file with the exact name provided by the user
+                base_filename = self.file_prefix_entry.get()  # Use the exact name as entered by the user
+                output_filename = f"{base_filename}.pdf"  # Add the ".pdf" extension
+                output_path = os.path.join(output_dir, output_filename)
                 output_pdf.save(output_path)
                 output_pdf.close()
                 self.log_info(f"Saved: {output_path}")
