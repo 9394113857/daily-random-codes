@@ -102,7 +102,6 @@ class PDFSplitterApp:
         self.root = root
         self.root.title("PDF Splitter")
         self.pdf_file = None
-        self.output_dir = None
         self.viewer_app = None
         self.init_gui()
 
@@ -158,18 +157,17 @@ class PDFSplitterApp:
                 for page_num in page_range:
                     output_pdf.insert_pdf(pdf, from_page=page_num, to_page=page_num)
                 
-                # Save the output file with the exact name provided by the user
-                base_filename = self.file_prefix_entry.get()  # Use the exact name as entered by the user
-                output_filename = f"{base_filename}.pdf"  # Add the ".pdf" extension
+                # Save the output file
+                output_filename = f"{file_prefix}.pdf"
                 output_path = os.path.join(output_dir, output_filename)
                 output_pdf.save(output_path)
                 output_pdf.close()
-                self.log_info(f"Saved: {output_path}")
+
+                # Show separate alerts for path and file name
+                self.show_success_message(os.path.basename(output_dir), output_filename)
 
             pdf.close()
-            messagebox.showinfo("Success", f"PDF split and saved to {output_dir}")
         except Exception as e:
-            self.log_error(str(e))
             messagebox.showerror("Error", f"Failed to split PDF: {e}")
 
     def parse_page_ranges(self, page_ranges, total_pages):
@@ -182,11 +180,20 @@ class PDFSplitterApp:
                 ranges.append([int(part) - 1])
         return ranges
 
-    def log_info(self, message):
-        print(f"[INFO] {message}")
+    def show_success_message(self, last_dir, file_name):
+        # Show last directory in big text
+        dir_popup = tk.Toplevel()
+        dir_popup.title("Saved Directory")
+        dir_popup.geometry("500x300")
+        tk.Label(dir_popup, text=f"Directory:\n\n{last_dir}", font=("Arial", 24, "bold")).pack(expand=True, padx=20, pady=20)
+        tk.Button(dir_popup, text="OK", command=dir_popup.destroy, font=("Arial", 16)).pack(pady=20)
 
-    def log_error(self, message):
-        print(f"[ERROR] {message}")
+        # Show file name in big text
+        file_popup = tk.Toplevel()
+        file_popup.title("Saved File Name")
+        file_popup.geometry("500x300")
+        tk.Label(file_popup, text=f"File Name:\n\n{file_name}", font=("Arial", 24, "bold")).pack(expand=True, padx=20, pady=20)
+        tk.Button(file_popup, text="OK", command=file_popup.destroy, font=("Arial", 16)).pack(pady=20)
 
 
 if __name__ == "__main__":
