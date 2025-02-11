@@ -1,0 +1,24 @@
+f you want to revert the staged changes and reset everything to the previous state, here's what you can do:
+
+1. Undo git add .
+This will unstage the changes (revert the git add):
+
+powershell
+Copy
+Edit
+git reset
+2. Discard All Untracked Changes (If Needed)
+To clean up untracked files and directories:
+
+powershell
+Copy
+Edit
+git clean -fd
+3. Revert Modified Files (If Necessary)
+If you want to discard all changes and return to the last commit:
+
+powershell
+Copy
+Edit
+git restore .
+Let me know how it goes!

@@ -4,7 +4,6 @@ import fitz  # PyMuPDF for PDF rendering
 from PIL import Image, ImageTk
 import os
 
-
 class PDFViewerApp:
     def __init__(self, pdf_file):
         self.viewer_root = tk.Toplevel()
@@ -96,7 +95,6 @@ class PDFViewerApp:
             self.current_page += 1
             self.show_page(self.current_page)
 
-
 class PDFSplitterApp:
     def __init__(self, root):
         self.root = root
@@ -115,7 +113,7 @@ class PDFSplitterApp:
         split_frame.pack(pady=10)
 
         # Input for page ranges
-        ttk.Label(split_frame, text="Page Ranges (e.g., 1-3, 5):").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
+        ttk.Label(split_frame, text="Page Ranges (e.g., 1-3, 5, 10-2):").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
         self.page_ranges_entry = ttk.Entry(split_frame, width=20)
         self.page_ranges_entry.grid(row=0, column=1, padx=5, pady=5)
 
@@ -156,9 +154,9 @@ class PDFSplitterApp:
                 output_pdf = fitz.open()
                 for page_num in page_range:
                     output_pdf.insert_pdf(pdf, from_page=page_num, to_page=page_num)
-                
+
                 # Save the output file
-                output_filename = f"{file_prefix}.pdf"
+                output_filename = f"{file_prefix}_{idx + 1}.pdf"
                 output_path = os.path.join(output_dir, output_filename)
                 output_pdf.save(output_path)
                 output_pdf.close()
@@ -171,11 +169,16 @@ class PDFSplitterApp:
             messagebox.showerror("Error", f"Failed to split PDF: {e}")
 
     def parse_page_ranges(self, page_ranges, total_pages):
+        """
+        Parse and handle dynamic page ranges, including ascending and descending ranges.
+        """
         ranges = []
         for part in page_ranges.split(","):
             if "-" in part:
                 start, end = map(int, part.split("-"))
-                ranges.append(range(start - 1, end))
+                # Ensure ranges work regardless of order (ascending or descending)
+                step = 1 if start <= end else -1
+                ranges.append(range(start - 1, end - 1 + step, step))
             else:
                 ranges.append([int(part) - 1])
         return ranges
@@ -194,7 +197,6 @@ class PDFSplitterApp:
         file_popup.geometry("500x300")
         tk.Label(file_popup, text=f"File Name:\n\n{file_name}", font=("Arial", 24, "bold")).pack(expand=True, padx=20, pady=20)
         tk.Button(file_popup, text="OK", command=file_popup.destroy, font=("Arial", 16)).pack(pady=20)
-
 
 if __name__ == "__main__":
     root = tk.Tk()
