@@ -150,14 +150,21 @@ class PDFSplitterApp:
 
             pdf = fitz.open(self.pdf_file)
             ranges = self.parse_page_ranges(page_ranges, len(pdf))
+
+            # Remove the suffix logic by using the prefix only
             for idx, page_range in enumerate(ranges):
                 output_pdf = fitz.open()
                 for page_num in page_range:
                     output_pdf.insert_pdf(pdf, from_page=page_num, to_page=page_num)
 
-                # Save the output file
-                output_filename = f"{file_prefix}_{idx + 1}.pdf"
+                # Save the output file with no _1, _2, etc. suffix
+                output_filename = f"{file_prefix}.pdf"  # Avoid appending any suffix
                 output_path = os.path.join(output_dir, output_filename)
+                
+                # If file exists, just replace it without asking
+                if os.path.exists(output_path):
+                    os.remove(output_path)  # Delete the existing file
+                
                 output_pdf.save(output_path)
                 output_pdf.close()
 
