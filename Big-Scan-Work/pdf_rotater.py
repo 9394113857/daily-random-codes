@@ -144,4 +144,4 @@ class PDFRotaterApp:
 if __name__ == "__main__":
     root = tk.Tk()
     app = PDFRotaterApp(root)
-    root.mainloop()
+    root.mainloop() 

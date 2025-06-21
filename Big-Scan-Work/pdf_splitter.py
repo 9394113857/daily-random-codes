@@ -171,7 +171,7 @@ class PDFSplitterApp:
         tk.Label(file_popup, text=f"File Name:\n\n{file_name}", font=("Arial", 24, "bold")).pack(expand=True, padx=20, pady=20)
         tk.Button(file_popup, text="OK", command=file_popup.destroy, font=("Arial", 16)).pack(pady=20)
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     root = tk.Tk()
     app = PDFSplitterApp(root)
     root.mainloop()
