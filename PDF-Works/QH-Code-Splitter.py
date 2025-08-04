@@ -54,7 +54,7 @@ class PDFSplitter:
             messagebox.showerror("Error", f"Could not load PDF preview: {e}")
 
     def show_input_widgets(self):
-        self.output_label = Label(self.master, text="Output File Name (e.g. QH-0430):", bg="white")
+        self.output_label = Label(self.master, text="Output File Name (e.g. Q-0001):", bg="white")
         self.output_label.pack(pady=(10, 2))
         self.output_entry = Entry(self.master, textvariable=self.output_file_var, width=30)
         self.output_entry.pack()
