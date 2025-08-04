@@ -1,0 +1,8 @@
+# Clone only the 'PDF-Works' branch from the repository
+git clone --branch PDF-Works --single-branch https://github.com/9394113857/daily-random-codes.git
+
+# 1.'git clone' is the command used to create a local copy of a repository
+# 2.'--branch PDF-Works' specifies that only the 'PDF-Works' branch should be cloned
+# 3.'--single-branch' ensures that only the selected branch is downloaded, not the entire history of other branches
+# 4.'https://github.com/9394113857/daily-random-codes.git' is the URL of the repository to be cloned
+# 5.This command will download the 'PDF-Works' branch from the specified GitHub repository
