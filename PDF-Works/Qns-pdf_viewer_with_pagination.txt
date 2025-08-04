@@ -1,0 +1,22 @@
+pdf_viewer_with_pagination.py
+
+Qns-list:-
+Can I add filters?
+How to handle errors?
+Can you add validation?
+
+How to save output?
+
+Can I add images?
+
+How to load CSV?
+
+Can I add filters?
+
+How to edit CSV?
+
+How to add sorting?
+
+Fix CSV save path?
+
+How to debug Tkinter?
