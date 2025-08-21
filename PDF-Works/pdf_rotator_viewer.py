@@ -7,6 +7,7 @@ from tkinter import (
     messagebox, Canvas, Frame, END, SINGLE, BOTH, Y
 )
 
+
 class PDFRotatorViewer:
     def __init__(self, master):
         self.master = master
@@ -43,7 +44,6 @@ class PDFRotatorViewer:
         Button(master, text="Open Selected PDF", command=self.load_selected_pdf,
                width=25, font=("Arial", 12)).pack(pady=10)
 
-        # Save button on main window, disabled until PDF loaded
         self.save_main_btn = Button(master, text="💾 Save Rotated PDF", width=25,
                                     font=("Arial", 12), command=self.save_rotated_pdf, state="disabled")
         self.save_main_btn.pack(pady=5)
@@ -88,7 +88,7 @@ class PDFRotatorViewer:
             self.current_page_index = 0
             self.rotations = {i: 0 for i in range(len(self.doc))}
             self.show_preview_window()
-            self.save_main_btn.config(state="normal")  # Enable save button in main window
+            self.save_main_btn.config(state="normal")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load PDF:\n{e}")
 
@@ -114,8 +114,6 @@ class PDFRotatorViewer:
         Button(btn_frame, text="Next", width=12, command=self.show_next_page).grid(row=0, column=1, padx=5)
         Button(btn_frame, text="Rotate Left", width=12, command=self.rotate_left).grid(row=0, column=2, padx=5)
         Button(btn_frame, text="Rotate Right", width=12, command=self.rotate_right).grid(row=0, column=3, padx=5)
-
-        # New Delete Page button
         Button(btn_frame, text="Delete Page", width=12, fg="white", bg="red", command=self.delete_current_page).grid(row=0, column=4, padx=5)
 
         self.save_btn = Button(main_frame, text="💾 Save Rotated PDF", width=30, bg="#4CAF50", fg="white",
@@ -130,7 +128,6 @@ class PDFRotatorViewer:
             self.page_label.config(text="No pages to display.")
             return
 
-        # Make sure current_page_index is valid
         if self.current_page_index >= len(self.doc):
             self.current_page_index = len(self.doc) - 1
         if self.current_page_index < 0:
@@ -185,34 +182,21 @@ class PDFRotatorViewer:
         if not confirm:
             return
 
-        # Remove page from PyMuPDF document
         self.doc.delete_page(self.current_page_index)
 
-        # Remove page from PyPDF2 reader's pages list
-        # PyPDF2 does not support direct removal, so we create a new list without the deleted page
-        new_pages = []
-        for i, page in enumerate(self.pdf_reader.pages):
-            if i != self.current_page_index:
-                new_pages.append(page)
-        self.pdf_reader.pages = new_pages
-
-        # Remove rotation entry for that page and adjust keys for subsequent pages
         new_rotations = {}
         for i in range(len(self.doc)):
-            # If i >= current_page_index, rotations shift by one index up from old rotations i+1
             if i < self.current_page_index:
                 new_rotations[i] = self.rotations.get(i, 0)
             else:
                 new_rotations[i] = self.rotations.get(i + 1, 0)
         self.rotations = new_rotations
 
-        # Adjust current page index if needed
         if self.current_page_index >= len(self.doc):
             self.current_page_index = len(self.doc) - 1
 
         if len(self.doc) == 0:
             messagebox.showinfo("Info", "All pages deleted from the PDF.")
-            # Disable save buttons and clear preview
             self.save_main_btn.config(state="disabled")
             self.save_btn.config(state="disabled")
             self.canvas.delete("all")
@@ -222,7 +206,7 @@ class PDFRotatorViewer:
         self.update_page_image()
 
     def save_rotated_pdf(self):
-        if not self.pdf_reader or len(self.pdf_reader.pages) == 0:
+        if not self.doc or len(self.doc) == 0:
             messagebox.showerror("Error", "No PDF loaded or no pages to save.")
             return
 
@@ -235,15 +219,17 @@ class PDFRotatorViewer:
             return
 
         writer = PyPDF2.PdfWriter()
-        for i, page in enumerate(self.pdf_reader.pages):
+        for i in range(len(self.doc)):
+            page = self.pdf_reader.pages[i]
             rotation = self.rotations.get(i, 0)
-            page.rotate_clockwise(rotation)
+            page.rotate(rotation)  # ✅ Replaces deprecated rotate_clockwise
             writer.add_page(page)
 
         with open(save_path, "wb") as f:
             writer.write(f)
 
         messagebox.showinfo("Success", f"PDF saved as:\n{os.path.basename(save_path)}")
+
 
 if __name__ == "__main__":
     root = Tk()
