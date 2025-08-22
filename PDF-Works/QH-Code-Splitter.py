@@ -122,7 +122,7 @@ class PDFSplitter:
             page_range = self.page_range_var.get().strip()
 
             if not output_base_name:
-                messagebox.showerror("Error", "Please enter output file name like QH-0430.")
+                messagebox.showerror("Error", "Please enter output file name like QH/QM-0000.")
                 return
             if not page_range or '-' not in page_range:
                 messagebox.showerror("Error", "Please enter valid page range like 1-4.")
