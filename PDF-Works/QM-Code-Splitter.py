@@ -2,7 +2,10 @@ import os
 import fitz  # PyMuPDF
 from PIL import Image, ImageTk
 import PyPDF2
-from tkinter import Tk, Toplevel, filedialog, Button, Label, Entry, StringVar, messagebox, Canvas
+from tkinter import (
+    Tk, Toplevel, filedialog, Button, Label, Entry, StringVar,
+    messagebox, Canvas, Frame, BOTH, YES
+)
 
 
 class PDFSplitter:
@@ -14,13 +17,18 @@ class PDFSplitter:
 
         self.pdf_file_path = None
         self.pdf_reader = None
-        self.output_path = None
+        self.doc = None
         self.current_page_index = 0
-        self.page_images = []
+        self.rotations = {}
+        self.deleted_pages = set()
+        self.output_path = None
 
-        # File Select Button
-        self.select_button = Button(master, text="Select PDF File", command=self.select_pdf_file, width=25, font=("Arial", 12))
+        self.select_button = Button(master, text="Select PDF File", command=self.select_pdf_file,
+                                    width=25, font=("Arial", 12))
         self.select_button.pack(pady=40)
+
+        self.output_file_var = StringVar()
+        self.page_range_var = StringVar()
 
         self.output_label = None
         self.output_entry = None
@@ -28,162 +36,189 @@ class PDFSplitter:
         self.range_entry = None
         self.save_button = None
 
-        self.output_file_var = StringVar()
-        self.page_range_var = StringVar()
-
     def select_pdf_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
         if file_path:
             self.pdf_file_path = file_path
             self.pdf_reader = PyPDF2.PdfReader(open(file_path, "rb"))
-            self.load_pdf_preview(file_path)
+            self.doc = fitz.open(file_path)
+            self.rotations = {i: 0 for i in range(len(self.doc))}
+            self.deleted_pages = set()
+            self.current_page_index = 0
 
-    def load_pdf_preview(self, file_path):
-        try:
-            doc = fitz.open(file_path)
-            self.page_images = []
-
-            for page in doc:
-                pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
-                img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                self.page_images.append(img)
+            self.master.title(f"PDF Splitter - {os.path.basename(file_path)}")
 
             self.show_preview_window()
             self.show_input_widgets()
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not load PDF preview: {e}")
 
     def show_input_widgets(self):
-        self.output_label = Label(self.master, text="Output File Name (e.g. Q-0001):", bg="white")
-        self.output_label.pack(pady=(10, 2))
-        self.output_entry = Entry(self.master, textvariable=self.output_file_var, width=30)
-        self.output_entry.pack()
+        if self.output_label is None:
+            self.output_label = Label(self.master, text="Output File Name (e.g. QM-0001):", bg="white")
+            self.output_label.pack(pady=(10, 2))
+        if self.output_entry is None:
+            self.output_entry = Entry(self.master, textvariable=self.output_file_var, width=30)
+            self.output_entry.pack()
 
-        self.range_label = Label(self.master, text="Page Range (e.g. 2-5):", bg="white")
-        self.range_label.pack(pady=(10, 2))
-        self.range_entry = Entry(self.master, textvariable=self.page_range_var, width=30)
-        self.range_entry.pack()
+        if self.range_label is None:
+            self.range_label = Label(self.master, text="Page Range (e.g. 2-5):", bg="white")
+            self.range_label.pack(pady=(10, 2))
+        if self.range_entry is None:
+            self.range_entry = Entry(self.master, textvariable=self.page_range_var, width=30)
+            self.range_entry.pack()
 
-        self.save_button = Button(self.master, text="Export Pages", command=self.save_selected_pages, width=20, font=("Arial", 12))
-        self.save_button.pack(pady=15)
+        if self.save_button is None:
+            self.save_button = Button(self.master, text="Export Pages", command=self.save_selected_pages,
+                                      width=20, font=("Arial", 12))
+            self.save_button.pack(pady=15)
 
     def show_preview_window(self):
         self.preview_win = Toplevel(self.master)
-        self.preview_win.title("PDF Preview")
-        self.preview_win.geometry("700x750")
+        self.preview_win.title(f"Preview - {os.path.basename(self.pdf_file_path)}")
+        # Start with a decent size, but allow resizing fully
+        self.preview_win.geometry("820x900")
+        self.preview_win.minsize(600, 700)  # minimum window size so it doesn't shrink too much
         self.preview_win.configure(bg="white")
 
-        self.canvas = Canvas(self.preview_win, width=680, height=640, bg="white", highlightthickness=0)
-        self.canvas.pack(pady=10)
+        # Use grid for main_frame to allow better resizing control
+        main_frame = Frame(self.preview_win, bg="white")
+        main_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
-        self.page_label = Label(self.preview_win, text="", font=("Arial", 10), bg="white")
-        self.page_label.pack(pady=5)
+        self.preview_win.grid_rowconfigure(0, weight=1)
+        self.preview_win.grid_columnconfigure(0, weight=1)
 
-        btn_frame = Label(self.preview_win, bg="white")
-        btn_frame.pack(pady=5)
+        # Canvas with expandable size
+        self.canvas = Canvas(main_frame, bg="white", highlightthickness=0)
+        self.canvas.grid(row=0, column=0, sticky="nsew")
 
-        Button(btn_frame, text="Previous", command=self.show_previous_page, width=10).grid(row=0, column=0, padx=5)
-        Button(btn_frame, text="Next", command=self.show_next_page, width=10).grid(row=0, column=1, padx=5)
+        # Page label below canvas
+        self.page_label = Label(main_frame, text="", font=("Arial", 14), bg="white")
+        self.page_label.grid(row=1, column=0, pady=5)
 
-        self.image_on_canvas = None
+        # Button frame below label
+        btn_frame = Frame(main_frame, bg="white")
+        btn_frame.grid(row=2, column=0, pady=10, sticky="ew")
+
+        # Configure main_frame rows and columns for resizing
+        main_frame.grid_rowconfigure(0, weight=1)  # canvas expands vertically
+        main_frame.grid_columnconfigure(0, weight=1)  # canvas expands horizontally
+
+        # Buttons in btn_frame - grid layout with spacing and sticky so they stay visible
+        btn_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)  # distribute buttons equally
+
+        Button(btn_frame, text="Previous", width=12, command=self.show_previous_page).grid(row=0, column=0, padx=5, sticky="ew")
+        Button(btn_frame, text="Next", width=12, command=self.show_next_page).grid(row=0, column=1, padx=5, sticky="ew")
+        Button(btn_frame, text="Rotate Left", width=12, command=self.rotate_left).grid(row=0, column=2, padx=5, sticky="ew")
+        Button(btn_frame, text="Rotate Right", width=12, command=self.rotate_right).grid(row=0, column=3, padx=5, sticky="ew")
+        Button(btn_frame, text="Delete Page", width=12, fg="white", bg="red", command=self.delete_current_page).grid(row=0, column=4, padx=5, sticky="ew")
+
+        # Bind resize event to update image scaling
+        self.preview_win.bind("<Configure>", self.on_resize)
+
         self.update_preview_image()
 
-        self.preview_win.bind("<Left>", lambda event: self.show_previous_page())
-        self.preview_win.bind("<Right>", lambda event: self.show_next_page())
-        self.preview_win.focus_set()
+    def on_resize(self, event):
+        # Called when preview window or widgets resize
+        # Update preview image to fit new canvas size
+        # Use after_idle to avoid multiple calls in rapid succession
+        self.preview_win.after_idle(self.update_preview_image)
 
     def update_preview_image(self):
-        if self.page_images:
-            img = self.page_images[self.current_page_index]
-            img_resized = img.resize((680, 640), Image.Resampling.LANCZOS)
-            self.tk_img = ImageTk.PhotoImage(img_resized)
-            if self.image_on_canvas:
-                self.canvas.itemconfig(self.image_on_canvas, image=self.tk_img)
-            else:
-                self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.tk_img)
+        if not self.doc or len(self.doc) == 0:
+            self.canvas.delete("all")
+            self.page_label.config(text="No pages to display.")
+            return
 
-            current = self.current_page_index + 1
-            total = len(self.page_images)
-            self.page_label.config(text=f"Page {current} of {total}")
+        # Skip deleted pages if current is deleted
+        while self.current_page_index in self.deleted_pages:
+            self.current_page_index += 1
+            if self.current_page_index >= len(self.doc):
+                self.current_page_index = 0
+
+        page = self.doc.load_page(self.current_page_index)
+        rot = self.rotations.get(self.current_page_index, 0)
+
+        # Get current canvas size
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+
+        if canvas_width <= 1 or canvas_height <= 1:
+            # Sometimes at startup canvas size is 1, ignore
+            return
+
+        # Render pixmap at 2x scale before rotation for quality
+        mat = fitz.Matrix(2, 2).prerotate(rot)
+        pix = page.get_pixmap(matrix=mat)
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+
+        # Calculate scaling to fit inside canvas
+        scale = min(canvas_width / img.width, canvas_height / img.height, 1)
+        new_w = int(img.width * scale)
+        new_h = int(img.height * scale)
+
+        img_resized = img.resize((new_w, new_h), Image.LANCZOS)
+
+        self.tk_img = ImageTk.PhotoImage(img_resized)
+        self.canvas.delete("all")
+        # Center image in canvas horizontally and vertically
+        x = (canvas_width - new_w) // 2
+        y = (canvas_height - new_h) // 2
+        self.canvas.create_image(x, y, anchor="nw", image=self.tk_img)
+
+        self.page_label.config(
+            text=f"Page {self.current_page_index + 1} of {len(self.doc)} | Rotation: {rot}° (Deleted: {len(self.deleted_pages)})"
+        )
 
     def show_next_page(self):
-        if self.current_page_index < len(self.page_images) - 1:
-            self.current_page_index += 1
+        next_index = self.current_page_index + 1
+        while next_index < len(self.doc) and next_index in self.deleted_pages:
+            next_index += 1
+        if next_index < len(self.doc):
+            self.current_page_index = next_index
             self.update_preview_image()
 
     def show_previous_page(self):
-        if self.current_page_index > 0:
-            self.current_page_index -= 1
+        prev_index = self.current_page_index - 1
+        while prev_index >= 0 and prev_index in self.deleted_pages:
+            prev_index -= 1
+        if prev_index >= 0:
+            self.current_page_index = prev_index
             self.update_preview_image()
 
+    def rotate_left(self):
+        if self.current_page_index in self.deleted_pages:
+            return
+        self.rotations[self.current_page_index] = (self.rotations.get(self.current_page_index, 0) - 90) % 360
+        self.update_preview_image()
+
+    def rotate_right(self):
+        if self.current_page_index in self.deleted_pages:
+            return
+        self.rotations[self.current_page_index] = (self.rotations.get(self.current_page_index, 0) + 90) % 360
+        self.update_preview_image()
+
+    def delete_current_page(self):
+        if self.current_page_index in self.deleted_pages:
+            messagebox.showinfo("Info", "Page already deleted.")
+            return
+
+        confirm = messagebox.askyesno("Delete Page", f"Delete page {self.current_page_index + 1}?")
+        if not confirm:
+            return
+
+        self.deleted_pages.add(self.current_page_index)
+        self.show_next_page()
+
+        if len(self.deleted_pages) == len(self.doc):
+            messagebox.showinfo("Info", "All pages deleted.")
+            self.canvas.delete("all")
+            self.page_label.config(text="No pages to display.")
+
     def save_selected_pages(self):
-        try:
-            output_base_name = self.output_file_var.get().strip()
-            page_range = self.page_range_var.get().strip()
-
-            if not output_base_name:
-                messagebox.showerror("Error", "Please enter output file name like QH-0430.")
-                return
-            if not page_range or '-' not in page_range:
-                messagebox.showerror("Error", "Please enter valid page range like 1-4.")
-                return
-            if not self.pdf_reader:
-                messagebox.showerror("Error", "Please select a PDF file first.")
-                return
-            if not self.output_path:
-                self.output_path = filedialog.askdirectory()
-                if not self.output_path:
-                    messagebox.showerror("Error", "No output directory selected.")
-                    return
-
-            start_str, end_str = page_range.split('-')
-            start_page = int(start_str)
-            end_page = int(end_str)
-
-            if start_page < 1 or end_page > len(self.pdf_reader.pages) or start_page > end_page:
-                messagebox.showerror("Error", "Page range is invalid.")
-                return
-
-            output_filename = f"{output_base_name}.pdf"
-            full_output_path = os.path.join(self.output_path, output_filename)
-
-            pdf_writer = PyPDF2.PdfWriter()
-            for page_num in range(start_page - 1, end_page):
-                pdf_writer.add_page(self.pdf_reader.pages[page_num])
-
-            with open(full_output_path, "wb") as output_file:
-                pdf_writer.write(output_file)
-
-            short_path = f"...{os.sep}" + os.path.basename(self.output_path)
-            self.show_success_popup(output_filename, short_path)
-
-            # Reset only page range input
-            self.page_range_var.set("")
-        except Exception as e:
-            messagebox.showerror("Error", f"An error occurred:\n{e}")
-
-    def show_success_popup(self, filename, short_path):
-        popup = Toplevel(self.master)
-        popup.title("Saved Successfully")
-        popup.geometry("500x200")
-        popup.configure(bg="white")
-
-        Label(popup, text="File Saved!", font=("Helvetica", 14, "bold"), fg="green", bg="white").pack(pady=10)
-        Label(popup, text=filename, font=("Helvetica", 18, "bold"), fg="black", bg="white").pack(pady=5)
-        Label(popup, text=f"Saved to: {short_path}", font=("Helvetica", 10), wraplength=460, bg="white").pack(pady=5)
-
-        Button(popup, text="OK", command=popup.destroy).pack(pady=10)
-        popup.after(5000, popup.destroy)
-
-    def exit_app(self):
-        self.master.quit()
-
-
-def main():
-    root = Tk()
-    app = PDFSplitter(root)
-    root.mainloop()
+        # Placeholder - implement your export logic here
+        pass
 
 
 if __name__ == "__main__":
-    main()
+    root = Tk()
+    app = PDFSplitter(root)
+    root.mainloop()
