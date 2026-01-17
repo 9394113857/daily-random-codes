@@ -2,3 +2,18 @@ python.exe -m pip install --upgrade pip
 
 
 git rm -r --cached venv 
+
+git check-ignore -v venv
+
+✅ What your output confirms
+.gitignore:11:venv/     venv
+
+This tells us:
+•	venv/ is correctly listed in .gitignore
+•	Git will ignore the venv folder
+•	Line 11 of .gitignore is doing the job
+•	venv/ will not be committed again
+✔️ Status: SUCCESS
+
+
+
