@@ -25,7 +25,7 @@ def get_recent_path():
 def delete_recent_items():
     recent_path = get_recent_path()
 
-    # Ensure folder exists (it should on Windows)
+    # Ensure folder exists
     if not os.path.isdir(recent_path):
         print(Style.RED + f"Recent Items folder not found at:\n{recent_path}" + Style.END)
         sys.exit(1)
@@ -43,22 +43,7 @@ def delete_recent_items():
         print(Style.GREEN + "Recent Items directory is already empty." + Style.END)
         return
 
-    print(Style.BLUE + f"Found {len(contents)} recent item(s)." + Style.END)
-
-    try:
-        user_input = input(
-            Style.BOLD + "Are you sure you want to delete all recent items? (yes/no): " + Style.END
-        ).strip().lower()
-    except KeyboardInterrupt:
-        print("\n" + Style.BLUE + "Operation cancelled by user." + Style.END)
-        return
-    except EOFError:
-        print("\n" + Style.RED + "No input detected. Operation cancelled." + Style.END)
-        return
-
-    if user_input not in ("yes", "y"):
-        print(Style.BLUE + "Operation cancelled." + Style.END)
-        return
+    print(Style.BLUE + f"Found {len(contents)} recent item(s). Deleting..." + Style.END)
 
     deleted = 0
     failed = 0
