@@ -2,11 +2,23 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from moviepy.editor import VideoFileClip
+
+try:
+    from moviepy.editor import VideoFileClip
+except ImportError:
+    try:
+        from moviepy import VideoFileClip
+    except ImportError:
+        VideoFileClip = None
+
 from tabulate import tabulate
 
 # Function to get video duration
 def get_video_duration(file_path):
+    if VideoFileClip is None:
+        print(f"MoviePy is not available for {file_path}")
+        return None
+
     try:
         clip = VideoFileClip(file_path)  # Load the video file using MoviePy
         duration = clip.duration  # Get the video duration in seconds
