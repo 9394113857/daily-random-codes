@@ -1,286 +1,903 @@
 import openpyxl
 import pyautogui
 import time
+import sys
 
 
 # ============================================================
-# LOGIN
+# CONFIGURATION
 # ============================================================
 
-def login(username, password):
-    # --------------------------------------------------------
-    # Step 1: Username
-    # --------------------------------------------------------
-    pyautogui.write(str(username), interval=0.03)
-    pyautogui.press("enter")
+XLSX_FILE = (
+    r"E:\Office-Works\daily-random-codes"
+    r"\Login-Logout local\cc.xlsx"
+)
 
-    print(f"2. Username entered: {username}")
+GOOGLE_LOGIN_URL = "https://accounts.google.com/signin"
+YOUTUBE_URL = "https://www.youtube.com"
+LOGOUT_URL = "https://accounts.google.com/logout"
 
-    # Give Google time to respond.
-    time.sleep(5)
 
-    # --------------------------------------------------------
-    # Step 2: Manual verification checkpoint
-    # --------------------------------------------------------
-    print("\n" + "=" * 65)
-    print("MANUAL CHECKPOINT")
-    print("=" * 65)
-    print()
-    print("Look at Chrome.")
-    print()
-    print("If Google shows a CAPTCHA/verification:")
-    print("  1. Complete the verification manually.")
-    print("  2. Wait until the password page is displayed.")
-    print("  3. Click inside the PASSWORD field.")
-    print()
-    print("If NO verification appeared:")
-    print("  1. Simply make sure the PASSWORD field is ready.")
-    print()
-    print("Then return to this PowerShell window.")
-    print()
-    print("Press ENTER = continue with password")
-    print("Type STOP   = stop the entire automation")
-    print()
-    print("=" * 65)
+# ============================================================
+# COUNTDOWN
+# ============================================================
 
-    decision = input("Your choice: ").strip().lower()
+def countdown(seconds, message):
 
-    if decision == "stop":
-        print("\nAutomation stopped by user.")
+    print()
+    print(message)
+
+    for remaining in range(seconds, 0, -1):
+
+        print(
+            f"\r  {remaining:02d} seconds remaining...",
+            end="",
+            flush=True
+        )
+
+        time.sleep(1)
+
+    print(
+        "\r  Done.                         "
+    )
+
+
+# ============================================================
+# OPEN URL IN CHROME
+# ============================================================
+
+def open_url(url, description, wait_seconds=10):
+
+    print()
+    print("=" * 70)
+    print(description)
+    print("=" * 70)
+
+    print()
+    print(f"URL:")
+    print(url)
+
+    countdown(
+        5,
+        "Opening URL in Chrome in..."
+    )
+
+    pyautogui.hotkey(
+        "ctrl",
+        "l"
+    )
+
+    time.sleep(1)
+
+    pyautogui.write(
+        url,
+        interval=0.03
+    )
+
+    pyautogui.press(
+        "enter"
+    )
+
+    print()
+    print("URL submitted.")
+
+    countdown(
+        wait_seconds,
+        "Waiting for page to load..."
+    )
+
+
+# ============================================================
+# ENTER USERNAME
+# ============================================================
+
+def enter_username(username, account_number):
+
+    print()
+    print("=" * 70)
+    print(
+        f"USERNAME STAGE - ACCOUNT {account_number}"
+    )
+    print("=" * 70)
+
+    print()
+    print(
+        f"Username loaded from Excel: {username}"
+    )
+
+    print()
+    print(
+        "Chrome should now show the Google "
+        "Email / Phone field."
+    )
+
+    print(
+        "Make sure Chrome is focused."
+    )
+
+    countdown(
+        5,
+        "Username entry will start in..."
+    )
+
+    pyautogui.write(
+        username,
+        interval=0.06
+    )
+
+    print()
+    print(
+        f"Username entered: {username}"
+    )
+
+    pyautogui.press(
+        "enter"
+    )
+
+    print(
+        "Username submitted."
+    )
+
+    countdown(
+        20,
+        "Waiting for Google after username..."
+    )
+
+
+# ============================================================
+# MANUAL GOOGLE LOGIN CHECKPOINT
+# ============================================================
+
+def google_login_checkpoint():
+
+    print()
+    print("=" * 70)
+    print("GOOGLE LOGIN CHECKPOINT")
+    print("=" * 70)
+
+    print()
+    print("Now look at Chrome.")
+    print()
+
+    print("Complete the remaining Google steps manually:")
+    print()
+    print("1. CAPTCHA / verification, if shown.")
+    print("2. Password entry.")
+    print("3. Recovery/security prompts, if shown.")
+    print("4. Phone/email verification, if shown.")
+    print("5. Any other Google security screen.")
+    print()
+    print(
+        "Continue until the account is completely logged in."
+    )
+
+    print()
+    print("-" * 70)
+    print("When login is completely successful:")
+    print("  Return to this PowerShell window.")
+    print("  Press ENTER.")
+    print()
+    print("If login failed or you want to stop:")
+    print("  Type STOP and press ENTER.")
+    print("-" * 70)
+
+    choice = input(
+        "\nYour choice: "
+    ).strip().lower()
+
+    if choice == "stop":
         return False
-
-    # Small delay after returning from PowerShell.
-    time.sleep(2)
-
-    # --------------------------------------------------------
-    # Step 3: Password
-    # --------------------------------------------------------
-    pyautogui.write(str(password), interval=0.03)
-    pyautogui.press("enter")
-
-    print("3. Password entered")
-
-    # Allow login to complete.
-    time.sleep(5)
-
-    # --------------------------------------------------------
-    # Step 4: YouTube
-    # --------------------------------------------------------
-    pyautogui.hotkey("ctrl", "l")
-    pyautogui.write("https://www.youtube.com", interval=0.03)
-    pyautogui.press("enter")
-
-    print("4. Entering into YouTube")
-
-    time.sleep(10)
 
     return True
 
 
 # ============================================================
-# LOGOUT
+# YOUTUBE STAGE
 # ============================================================
 
-def logout():
-    pyautogui.hotkey("ctrl", "l")
+def open_youtube():
 
-    logout_url = "https://accounts.google.com/logout"
+    print()
+    print("=" * 70)
+    print("YOUTUBE STAGE")
+    print("=" * 70)
 
-    pyautogui.write(logout_url, interval=0.03)
-    pyautogui.press("enter")
-
-    print("5. Logged out successfully")
-
-    time.sleep(5)
-
-
-# ============================================================
-# STARTUP
-# ============================================================
-
-print("\n" + "=" * 65)
-print("LOGIN / LOGOUT AUTOMATION - V2")
-print("=" * 65)
-
-print("\nMake sure Chrome is open and focused.")
-
-time.sleep(5)
-
-
-# ============================================================
-# OPEN GOOGLE LOGIN
-# ============================================================
-
-pyautogui.hotkey("ctrl", "l")
-
-link = "https://accounts.google.com/signin"
-
-pyautogui.write(link, interval=0.03)
-pyautogui.press("enter")
-
-print("1. Opening Google Sign-In")
-
-time.sleep(5)
-
-
-# ============================================================
-# EXCEL
-# ============================================================
-
-xlsx_file_name = (
-    r"E:\Office-Works\daily-random-codes"
-    r"\Login-Logout local\cc.xlsx"
-)
-
-try:
-    wb = openpyxl.load_workbook(xlsx_file_name)
-
-    sheet_names = wb.sheetnames
-
-    print("\nAvailable sheets:")
-
-    for number, sheet_name in enumerate(sheet_names, start=1):
-        print(f"{number}. {sheet_name}")
-
-    # --------------------------------------------------------
-    # Sheet selection
-    # --------------------------------------------------------
-
-    sheet_number = int(
-        input("\nEnter the sheet number: ")
+    countdown(
+        5,
+        "Opening YouTube in..."
     )
 
-    if sheet_number < 1 or sheet_number > len(sheet_names):
-        raise ValueError("Invalid sheet number.")
+    pyautogui.hotkey(
+        "ctrl",
+        "l"
+    )
 
-    ws = wb.worksheets[sheet_number - 1]
+    time.sleep(1)
 
-    print(f"\nSelected sheet: {ws.title}")
+    pyautogui.write(
+        YOUTUBE_URL,
+        interval=0.03
+    )
 
-    # --------------------------------------------------------
-    # Row selection
-    # --------------------------------------------------------
+    pyautogui.press(
+        "enter"
+    )
 
-    rows_to_process = input(
-        "Do you want to specify rows to process? (yes/no): "
-    ).strip().lower()
+    print()
+    print(
+        f"Entering: {YOUTUBE_URL}"
+    )
 
-    if rows_to_process == "yes":
+    print(
+        "YouTube URL submitted."
+    )
 
-        row_numbers = input(
-            "Enter exact row numbers separated by commas "
-            "(example: 1,6,10): "
+    countdown(
+        20,
+        "YouTube viewing time..."
+    )
+
+
+# ============================================================
+# LOGOUT STAGE
+# ============================================================
+
+def logout_account():
+
+    print()
+    print("=" * 70)
+    print("LOGOUT STAGE")
+    print("=" * 70)
+
+    print()
+    print(
+        "You can use/watch the browser during the countdown."
+    )
+
+    countdown(
+        20,
+        "Logout will begin in..."
+    )
+
+    pyautogui.hotkey(
+        "ctrl",
+        "l"
+    )
+
+    time.sleep(1)
+
+    pyautogui.write(
+        LOGOUT_URL,
+        interval=0.03
+    )
+
+    pyautogui.press(
+        "enter"
+    )
+
+    print()
+    print(
+        "Logout URL submitted."
+    )
+
+    countdown(
+        20,
+        "Waiting for Google logout..."
+    )
+
+    print(
+        "Logout step completed."
+    )
+
+
+# ============================================================
+# PARSE ACCOUNT NUMBERS
+# ============================================================
+
+def parse_accounts(text):
+
+    accounts = []
+
+    for value in text.split(","):
+
+        value = value.strip()
+
+        if not value:
+            continue
+
+        try:
+            number = int(value)
+        except ValueError:
+            raise ValueError(
+                f"'{value}' is not a valid account number."
+            )
+
+        if number < 1:
+            raise ValueError(
+                "Account numbers must be 1 or greater."
+            )
+
+        if number not in accounts:
+            accounts.append(number)
+
+    if not accounts:
+        raise ValueError(
+            "No account numbers were entered."
         )
 
-        rows = set()
+    return accounts
 
-        for value in row_numbers.split(","):
-            value = value.strip()
 
-            if value:
-                row_number = int(value)
+# ============================================================
+# LOAD ACCOUNT
+#
+# HEADER:
+# Row 1 = sno / username / password
+#
+# Account 1 -> Excel row 2
+# Account 2 -> Excel row 3
+# Account 6 -> Excel row 7
+# ============================================================
 
-                if row_number >= 1:
-                    rows.add(row_number)
+def load_account(ws, account_number):
 
-        print(f"Selected rows: {sorted(rows)}")
+    excel_row = account_number + 1
+
+    if excel_row > ws.max_row:
+
+        return None, (
+            f"Account {account_number} does not exist. "
+            f"Excel row {excel_row} is outside the sheet."
+        )
+
+    sno = ws.cell(
+        row=excel_row,
+        column=1
+    ).value
+
+    username = ws.cell(
+        row=excel_row,
+        column=2
+    ).value
+
+    password = ws.cell(
+        row=excel_row,
+        column=3
+    ).value
+
+    # --------------------------------------------------------
+    # Validate SNO
+    # --------------------------------------------------------
+
+    if sno is None:
+
+        return None, (
+            f"Excel row {excel_row}: SNO is empty."
+        )
+
+    # --------------------------------------------------------
+    # Validate username
+    # --------------------------------------------------------
+
+    if (
+        username is None
+        or str(username).strip() == ""
+    ):
+
+        return None, (
+            f"Excel row {excel_row}: username is empty."
+        )
+
+    # --------------------------------------------------------
+    # Validate password exists.
+    #
+    # Password is deliberately NOT displayed.
+    # --------------------------------------------------------
+
+    if (
+        password is None
+        or str(password).strip() == ""
+    ):
+
+        return None, (
+            f"Excel row {excel_row}: password is empty."
+        )
+
+    return {
+        "account": account_number,
+        "excel_row": excel_row,
+        "sno": sno,
+        "username": str(username).strip()
+    }, None
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+print()
+print("=" * 70)
+print("GOOGLE LOGIN / LOGOUT AUTOMATION - V2")
+print("=" * 70)
+
+print()
+print("Excel file:")
+print(XLSX_FILE)
+
+print()
+print("Chrome must already be OPEN.")
+
+countdown(
+    5,
+    "Starting program in..."
+)
+
+
+try:
+
+    # ========================================================
+    # LOAD EXCEL
+    # ========================================================
+
+    print()
+    print("=" * 70)
+    print("LOADING EXCEL")
+    print("=" * 70)
+
+    wb = openpyxl.load_workbook(
+        XLSX_FILE,
+        data_only=True
+    )
+
+    print()
+    print("Available sheets:")
+
+    for number, sheet_name in enumerate(
+        wb.sheetnames,
+        start=1
+    ):
+
+        print(
+            f"{number}. {sheet_name}"
+        )
+
+
+    # ========================================================
+    # SELECT SHEET
+    # ========================================================
+
+    while True:
+
+        try:
+
+            sheet_number = int(
+                input(
+                    "\nEnter the sheet number: "
+                )
+            )
+
+            if (
+                sheet_number < 1
+                or sheet_number > len(wb.sheetnames)
+            ):
+
+                print(
+                    "Invalid sheet number."
+                )
+
+                continue
+
+            break
+
+        except ValueError:
+
+            print(
+                "Please enter a valid sheet number."
+            )
+
+
+    ws = wb.worksheets[
+        sheet_number - 1
+    ]
+
+    print()
+    print(
+        f"Selected sheet: {ws.title}"
+    )
+
+
+    # ========================================================
+    # ASK WHETHER TO SPECIFY USERS
+    # ========================================================
+
+    while True:
+
+        answer = input(
+            "\nDo you want to specify users? "
+            "(yes/no): "
+        ).strip().lower()
+
+        if answer in (
+            "yes",
+            "no"
+        ):
+
+            break
+
+        print(
+            "Please enter yes or no."
+        )
+
+
+    # ========================================================
+    # NO SPECIFIC USERS
+    # ========================================================
+
+    if answer == "no":
+
+        selected_accounts = list(
+            range(
+                1,
+                ws.max_row
+            )
+        )
 
     else:
 
-        # You said you want selected rows only,
-        # so don't accidentally process everything.
-        print("\nNo rows selected.")
-        print("Stopping safely.")
-        raise SystemExit
+        while True:
+
+            try:
+
+                account_text = input(
+                    "\nEnter account numbers "
+                    "(example: 1,6,10): "
+                )
+
+                selected_accounts = parse_accounts(
+                    account_text
+                )
+
+                break
+
+            except ValueError as error:
+
+                print(
+                    f"Invalid input: {error}"
+                )
 
 
     # ========================================================
-    # PROCESS SELECTED ROWS
+    # VALIDATE ACCOUNTS BEFORE OPENING GOOGLE
     # ========================================================
 
-    all_rows = list(
-        ws.iter_rows(values_only=True)
-    )
+    print()
+    print("=" * 70)
+    print("VALIDATING EXCEL DATA")
+    print("=" * 70)
 
-    for i, row in enumerate(all_rows, start=1):
+    valid_accounts = []
 
-        # Skip rows that weren't selected.
-        if i not in rows:
-            continue
+    for account_number in selected_accounts:
 
-        # ----------------------------------------------------
-        # Validate row
-        # ----------------------------------------------------
+        account, error = load_account(
+            ws,
+            account_number
+        )
 
-        if len(row) < 3:
-            print(f"\nRow {i} does not contain 3 columns.")
-            print("Expected: SNO | Username | Password")
-            continue
+        if error:
 
-        sno, username, password = row
-
-        if username is None or password is None:
+            print()
             print(
-                f"\nSkipping Row {i}: "
-                "username/password is empty."
+                f"WARNING: {error}"
             )
+
             continue
 
-        print("\n" + "=" * 65)
-        print(f"Executing Row {i}")
-        print(f"SNO: {sno}")
-        print(f"Username: {username}")
-        print("=" * 65)
+        print()
+        print("-" * 70)
 
-        # ----------------------------------------------------
-        # Login
-        # ----------------------------------------------------
+        print(
+            f"Account   : {account['account']}"
+        )
 
-        success = login(username, password)
+        print(
+            f"Excel row : {account['excel_row']}"
+        )
 
-        # User requested STOP.
-        if not success:
-            print("\nAutomation stopped.")
+        print(
+            f"SNO       : {account['sno']}"
+        )
+
+        print(
+            f"Username  : {account['username']}"
+        )
+
+        print(
+            "Password  : [AVAILABLE]"
+        )
+
+        print(
+            "Status    : READY"
+        )
+
+        print("-" * 70)
+
+        valid_accounts.append(
+            account
+        )
+
+
+    # ========================================================
+    # STOP IF NO VALID DATA
+    # ========================================================
+
+    if not valid_accounts:
+
+        print()
+        print(
+            "No valid accounts found."
+        )
+
+        print(
+            "Nothing will be processed."
+        )
+
+        sys.exit()
+
+
+    # ========================================================
+    # RESULTS
+    # ========================================================
+
+    results = []
+
+
+    # ========================================================
+    # PROCESS EACH ACCOUNT
+    # ========================================================
+
+    for index, account in enumerate(
+        valid_accounts,
+        start=1
+    ):
+
+        account_number = account[
+            "account"
+        ]
+
+        excel_row = account[
+            "excel_row"
+        ]
+
+        sno = account[
+            "sno"
+        ]
+
+        username = account[
+            "username"
+        ]
+
+
+        print()
+        print()
+        print("=" * 70)
+
+        print(
+            f"PROCESSING ACCOUNT {account_number}"
+        )
+
+        print(
+            f"Excel row : {excel_row}"
+        )
+
+        print(
+            f"SNO       : {sno}"
+        )
+
+        print(
+            f"Progress  : "
+            f"{index}/{len(valid_accounts)}"
+        )
+
+        print("=" * 70)
+
+
+        # ====================================================
+        # GOOGLE SIGN-IN
+        # ====================================================
+
+        open_url(
+            GOOGLE_LOGIN_URL,
+            "GOOGLE SIGN-IN",
+            wait_seconds=10
+        )
+
+
+        # ====================================================
+        # USERNAME
+        # ====================================================
+
+        enter_username(
+            username,
+            account_number
+        )
+
+
+        # ====================================================
+        # MANUAL PASSWORD / SECURITY CHECKPOINT
+        # ====================================================
+
+        login_success = (
+            google_login_checkpoint()
+        )
+
+
+        # ====================================================
+        # STOP REQUESTED
+        # ====================================================
+
+        if not login_success:
+
+            results.append({
+                "account": account_number,
+                "sno": sno,
+                "status": "STOPPED"
+            })
+
+            print()
+            print(
+                "Stopping entire automation."
+            )
+
             break
 
-        # ----------------------------------------------------
-        # Logout
-        # ----------------------------------------------------
 
-        logout()
+        # ====================================================
+        # LOGIN CONFIRMED
+        # ====================================================
 
-        time.sleep(5)
+        print()
+        print(
+            "Google login confirmed."
+        )
 
-        # ----------------------------------------------------
-        # Prepare Google login for next selected account
-        # ----------------------------------------------------
+        results.append({
+            "account": account_number,
+            "sno": sno,
+            "status": "LOGIN OK"
+        })
 
-        if i != max(rows):
 
-            pyautogui.hotkey("ctrl", "l")
+        # ====================================================
+        # YOUTUBE
+        # ====================================================
 
-            pyautogui.write(
-                "https://accounts.google.com/signin",
-                interval=0.03
+        open_youtube()
+
+
+        # ====================================================
+        # LOGOUT
+        # ====================================================
+
+        logout_account()
+
+
+        # ====================================================
+        # MARK COMPLETED
+        # ====================================================
+
+        results[-1][
+            "status"
+        ] = "COMPLETED"
+
+
+        print()
+        print(
+            f"Account {account_number} completed."
+        )
+
+
+        # ====================================================
+        # WAIT BEFORE NEXT ACCOUNT
+        # ====================================================
+
+        if index < len(valid_accounts):
+
+            countdown(
+                10,
+                "Preparing next selected account..."
             )
 
-            pyautogui.press("enter")
 
-            print("Opening Google Sign-In for next account")
+    # ========================================================
+    # FINAL REPORT
+    # ========================================================
 
-            time.sleep(5)
+    print()
+    print()
+    print("=" * 70)
+    print("FINAL REPORT")
+    print("=" * 70)
 
+    print()
 
-    print("\n" + "=" * 65)
-    print("Selected-row processing completed.")
-    print("=" * 65)
+    print(
+        f"Selected sheet : {ws.title}"
+    )
+
+    print(
+        f"Requested      : "
+        f"{len(selected_accounts)}"
+    )
+
+    print(
+        f"Valid accounts : "
+        f"{len(valid_accounts)}"
+    )
+
+    print(
+        f"Processed      : "
+        f"{len(results)}"
+    )
+
+    print()
+
+    print(
+        "+----------+----------+------------------+"
+    )
+
+    print(
+        "| Account  | SNO      | Status           |"
+    )
+
+    print(
+        "+----------+----------+------------------+"
+    )
+
+    for result in results:
+
+        print(
+            f"| "
+            f"{str(result['account']):<8} "
+            f"| "
+            f"{str(result['sno']):<8} "
+            f"| "
+            f"{result['status']:<16} "
+            f"|"
+        )
+
+    print(
+        "+----------+----------+------------------+"
+    )
+
+    print()
+    print(
+        "Passwords are not displayed by the program."
+    )
+
+    print()
+    print("=" * 70)
+    print("AUTOMATION FINISHED")
+    print("=" * 70)
 
 
 except KeyboardInterrupt:
 
-    print("\nAutomation interrupted by keyboard.")
+    print()
+    print("=" * 70)
+    print("PROGRAM INTERRUPTED")
+    print("=" * 70)
 
 
-except Exception as e:
+except Exception as error:
 
-    print(f"\nError: {e}")
+    print()
+    print("=" * 70)
+    print("PROGRAM ERROR")
+    print("=" * 70)
+
+    print(
+        f"{type(error).__name__}: {error}"
+    )
+
+    print("=" * 70)

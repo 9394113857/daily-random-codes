@@ -1,22 +1,23 @@
 import openpyxl
 import pyautogui
 
+
 # Function to perform login actions
 def login(username, password):
     # Type the username and press Enter
     pyautogui.write(username)
-    pyautogui.press('enter')
+    pyautogui.press("enter")
     print(f"2. Typing Username: {username}")
     pyautogui.sleep(5)
 
     # Type the password and press Enter
     pyautogui.write(password)
-    pyautogui.press('enter')
+    pyautogui.press("enter")
     print("3. Typing Password")
     pyautogui.sleep(5)
 
     # Press 'f6' key again (optional, remove if not needed)
-    pyautogui.press('f6')
+    pyautogui.press("f6")
 
     # Add additional sleep time before accessing YouTube
     pyautogui.sleep(10)  # Additional sleep time for stability
@@ -24,38 +25,40 @@ def login(username, password):
     # Type the YouTube URL and press Enter
     YouTube = "www.youtube.com"
     pyautogui.write(YouTube)
-    pyautogui.press('enter')
+    pyautogui.press("enter")
     print("4. Entering into YouTube")
 
     # Add a delay or sleep to allow time for the page to load
     pyautogui.sleep(10)  # Increased sleep time for YouTube page load
 
+
 # Function to perform logout actions
 def logout():
-    pyautogui.press('f6')
+    pyautogui.press("f6")
     logout_url = "https://accounts.google.com/logout"
     pyautogui.write(logout_url)
-    pyautogui.press('enter')
+    pyautogui.press("enter")
     print("5. Logged out successfully")
     pyautogui.sleep(5)  # Sleep time after logout
+
 
 # Sleep for 5 seconds before starting to allow time to focus on the target window
 pyautogui.sleep(5)
 
 # Press 'f6' key (optional, remove if not needed)
-pyautogui.press('f6')
+pyautogui.press("f6")
 
 # Type the URL directly using pyautogui
 link = "https://accounts.google.com/signin"
 pyautogui.write(link)
-pyautogui.press('enter')  # Press Enter to navigate to the URL
+pyautogui.press("enter")  # Press Enter to navigate to the URL
 print("1. Typing URL")
 
 # Wait for the login page to load (adjust sleep time as needed)
 pyautogui.sleep(5)
 
 # Corrected Excel file path
-xlsx_file_name = "D:\\daily-random-codes-main\\Login-Logout local\\cc.xlsx"
+xlsx_file_name = "E:\\Office-Works\\daily-random-codes\\Login-Logout local\\cc.xlsx"
 
 # Read sno, username, and password from Excel file
 try:
@@ -72,7 +75,9 @@ try:
     rows_to_process = input("Do you want to specify rows to process? (yes/no): ")
     if rows_to_process.lower() == "yes":
         row_numbers = input("Enter the row numbers separated by commas (e.g., 1,6): ")
-        rows = [int(row.strip()) + 1 for row in row_numbers.split(",")]  # Adjusting row numbers as per user input
+        rows = [
+            int(row.strip()) + 1 for row in row_numbers.split(",")
+        ]  # Adjusting row numbers as per user input
     else:
         rows = None
 
@@ -95,12 +100,12 @@ try:
             # Check if there are more users in the loop
             if i < len(list(ws.iter_rows(values_only=True))):
                 # Press 'f6' key (optional, remove if not needed)
-                pyautogui.press('f6')
+                pyautogui.press("f6")
 
                 # Type the URL directly using pyautogui
                 link = "https://accounts.google.com/signin"
                 pyautogui.write(link)
-                pyautogui.press('enter')  # Press Enter to navigate to the URL
+                pyautogui.press("enter")  # Press Enter to navigate to the URL
                 print("1. Typing URL")
 
                 # Wait for the login page to load (adjust sleep time as needed)
